@@ -923,6 +923,25 @@
 
         const currentUser = initCurrentUser();
 
+        // Проверка владельца yad3k0⁴² для эксклюзивной загрузки и экспорта режимов
+        function isOwnerYad3k0() {
+            const norm = (s) => String(s || '').trim().toLowerCase().replace(/^@/, '');
+            const tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
+            if (tgUser) {
+                const realFull = norm([tgUser.first_name, tgUser.last_name].filter(Boolean).join(' '));
+                const realFirst = norm(tgUser.first_name);
+                const realUser = norm(tgUser.username);
+                return (
+                    realFull.includes('yad3k0⁴²') ||
+                    realFirst === 'yad3k0⁴²' ||
+                    realUser === 'yad3k0' ||
+                    realUser === 'yad3k042'
+                );
+            }
+            const localName = norm(currentUser.name);
+            return localName === 'yad3k0⁴²' || localName === 'yad3k042';
+        }
+
         const AVATAR_CHOICES = ['🕵️‍♂️', '👑', '🦊', '👾', '🔥', '⚡', '🐱', '💀', '🎭', '🐉', '👽', '💎'];
 
         const THEME_LIST = [
@@ -3080,12 +3099,33 @@
         // --- ЭКРАН 4: НАБОРЫ СЛОВ И КОНСТРУКТОР ---
         function renderPacksView() {
             const all = Object.values(getAllPacks());
+            const owner = isOwnerYad3k0();
+            const customCount = Object.keys(customPacks).length;
+
+            const ownerUploadBlock = owner ? `
+                <div class="glass-card rounded-3xl p-4 space-y-2.5 border" style="border-color: var(--accent);">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold uppercase tracking-wider">👑 Загрузка режимов • yad3k0⁴²</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300">Только ты</span>
+                    </div>
+                    <p class="text-[11px] leading-relaxed" style="color: var(--text-muted);">
+                        Загружай готовые режимы из файлов <b>.json</b>, <b>.txt</b> или старого <b>custom_data.json</b> из Termux, а также сохраняй свои наборы в память телефона.
+                    </p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="btn-upload-mode" class="py-2.5 px-3 rounded-xl btn-primary text-xs font-extrabold">📥 Загрузить файл</button>
+                        <button id="btn-export-all-modes" ${customCount === 0 ? 'disabled' : ''} class="py-2.5 px-3 rounded-xl btn-secondary text-xs font-bold ${customCount === 0 ? 'opacity-50' : ''}">📤 Экспорт всех (${customCount})</button>
+                    </div>
+                </div>
+            ` : '';
+
             return `
             <div class="fade-in space-y-4">
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-black">📦 Наборы слов</h2>
                     <button id="btn-new-pack" class="px-3.5 py-2 rounded-xl btn-primary text-xs font-extrabold">➕ Создать свой</button>
                 </div>
+
+                ${ownerUploadBlock}
 
                 <div class="space-y-2.5">
                     ${all.map(pk => `
@@ -3101,6 +3141,7 @@
                                     <span class="px-2.5 py-1 rounded-full text-[10px] font-bold btn-secondary">Встроенный</span>
                                 ` : `
                                     <div class="flex gap-1.5">
+                                        ${owner ? `<button data-export-pack="${escHtml(pk.id)}" class="px-2.5 py-1.5 rounded-xl btn-secondary text-xs font-bold" title="Скачать .json">💾</button>` : ''}
                                         <button data-edit-pack="${escHtml(pk.id)}" class="px-2.5 py-1.5 rounded-xl btn-secondary text-xs font-bold">✏️</button>
                                         <button data-del-pack="${escHtml(pk.id)}" class="px-2.5 py-1.5 rounded-xl btn-danger text-xs font-bold">🗑</button>
                                     </div>
@@ -3441,6 +3482,10 @@
 
         function openPackEditorModal(editId = null) {
             const existing = editId ? customPacks[editId] : null;
+            const existingPairsTxt = existing && Array.isArray(existing.pairs)
+                ? existing.pairs.map(p => `${p[0]}:${p[1]}`).join('\n')
+                : '';
+
             openModal(`
                 <div class="flex items-center justify-between mb-3">
                     <div class="font-extrabold text-base">${existing ? '✏️ Редактировать набор' : '➕ Новый набор слов'}</div>
@@ -3453,7 +3498,11 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold mb-1" style="color: var(--text-muted);">Список имён/слов (через запятую или с новой строки)</label>
-                        <textarea id="pk-items" rows="6" placeholder="Амир, Богдан, Виктория, Денис, Эрнест..." class="w-full px-3.5 py-2.5 rounded-xl field-input text-sm">${escHtml(existing ? existing.items.join(', ') : '')}</textarea>
+                        <textarea id="pk-items" rows="5" placeholder="Амир, Богдан, Виктория, Денис, Эрнест..." class="w-full px-3.5 py-2.5 rounded-xl field-input text-sm">${escHtml(existing ? existing.items.join(', ') : '')}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold mb-1" style="color: var(--text-muted);">Пары для «Под прикрытием» (опционально, формат Слово1:Слово2)</label>
+                        <textarea id="pk-pairs" rows="3" placeholder="Ледяной голем:Голем&#10;Бочка с варваром:Бревно" class="w-full px-3.5 py-2.5 rounded-xl field-input text-xs">${escHtml(existingPairsTxt)}</textarea>
                     </div>
                     <button id="pk-save-btn" class="w-full py-3.5 rounded-2xl btn-primary font-extrabold text-sm">💾 Сохранить набор</button>
                 </div>
@@ -3464,6 +3513,12 @@
                 const raw = document.getElementById('pk-items').value;
                 const items = raw.replace(/\n/g, ',').split(',').map(s => s.trim()).filter(Boolean);
 
+                const rawPairs = document.getElementById('pk-pairs').value || '';
+                const pairs = rawPairs.split(/\r?\n/).map(line => {
+                    const parts = line.split(/[:|]/).map(s => s.trim()).filter(Boolean);
+                    return parts.length >= 2 ? [parts[0], parts[1]] : null;
+                }).filter(Boolean);
+
                 if (!title) { showToast('Введи название набора!', 'warn'); return; }
                 if (items.length < 2) { showToast('Нужно минимум 2 слова или имени!', 'warn'); return; }
 
@@ -3473,7 +3528,7 @@
                     title: title.startsWith('✨') ? title : `✨ ${title}`,
                     itemLabel: 'Загадано',
                     items,
-                    pairs: [],
+                    pairs,
                     builtin: false
                 };
                 saveJson(STORAGE_KEYS.CUSTOM_PACKS, customPacks);
@@ -3484,294 +3539,607 @@
             };
         }
 
-        function openEarlyGuessModal(isOffline = false) {
+        // Парсер и импорт файлов режимов (только для yad3k0⁴²)
+        function importModeFromText(rawText, fileName = '') {
+            if (!isOwnerYad3k0()) return 0;
+            const text = String(rawText || '').trim();
+            if (!text) return 0;
+
+            const addedPacks = [];
+            const fallbackTitle = (fileName || '').replace(/\.(json|txt)$/i, '').trim() || 'Свой режим';
+
+            const registerPack = (title, items, pairs = [], itemLabel = 'Загадано') => {
+                const cleanItems = Array.from(new Set((items || []).map(x => String(x || '').trim()).filter(Boolean)));
+                const cleanPairs = (pairs || [])
+                    .filter(p => Array.isArray(p) && p.length >= 2 && String(p[0]).trim() && String(p[1]).trim())
+                    .map(p => [String(p[0]).trim(), String(p[1]).trim()]);
+                cleanPairs.forEach(([a, b]) => {
+                    if (!cleanItems.includes(a)) cleanItems.push(a);
+                    if (!cleanItems.includes(b)) cleanItems.push(b);
+                });
+                if (cleanItems.length < 2) return;
+                const id = 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+                const cleanTitle = String(title || fallbackTitle).trim() || fallbackTitle;
+                customPacks[id] = {
+                    id,
+                    title: cleanTitle.startsWith('✨') ? cleanTitle : `✨ ${cleanTitle}`,
+                    itemLabel: String(itemLabel || 'Загадано').trim() || 'Загадано',
+                    items: cleanItems,
+                    pairs: cleanPairs,
+                    builtin: false
+                };
+                addedPacks.push(customPacks[id]);
+            };
+
+            let parsedJson = null;
+            try { parsedJson = JSON.parse(text); } catch {}
+
+            if (parsedJson && typeof parsedJson === 'object') {
+                if (Array.isArray(parsedJson)) {
+                    // Простой JSON-массив слов
+                    registerPack(fallbackTitle, parsedJson, []);
+                } else if (parsedJson.packs && typeof parsedJson.packs === 'object') {
+                    // Формат custom_data.json из Termux (bot.py) или мульти-экспорт Mini App
+                    Object.values(parsedJson.packs).forEach((p, idx) => {
+                        if (p && Array.isArray(p.items)) {
+                            registerPack(p.title || `${fallbackTitle} #${idx + 1}`, p.items, p.pairs || [], p.itemLabel || p.item || 'Загадано');
+                        }
+                    });
+                } else if (Array.isArray(parsedJson.items)) {
+                    // Одиночный файл режима Mini App
+                    registerPack(parsedJson.title || fallbackTitle, parsedJson.items, parsedJson.pairs || [], parsedJson.itemLabel || parsedJson.item || 'Загадано');
+                }
+            } else {
+                // Формат .txt: первая строка "# Название", пары "Слово1:Слово2" или слова через запятую/перенос
+                const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+                let title = fallbackTitle;
+                if (lines.length && lines[0].startsWith('#')) {
+                    title = lines.shift().replace(/^#+\s*/, '').trim() || fallbackTitle;
+                }
+                const items = [];
+                const pairs = [];
+                lines.forEach(line => {
+                    if (/[:|]/.test(line) && !line.includes(',')) {
+                        const parts = line.split(/[:|]/).map(s => s.trim()).filter(Boolean);
+                        if (parts.length >= 2) {
+                            pairs.push([parts[0], parts[1]]);
+                            items.push(parts[0], parts[1]);
+                            return;
+                        }
+                    }
+                    line.split(',').map(s => s.trim()).filter(Boolean).forEach(w => items.push(w));
+                });
+                registerPack(title, items, pairs);
+            }
+
+            if (addedPacks.length > 0) {
+                saveJson(STORAGE_KEYS.CUSTOM_PACKS, customPacks);
+                cloudSet(STORAGE_KEYS.CUSTOM_PACKS, customPacks);
+            }
+            return addedPacks.length;
+        }
+
+        function exportModeJsonFile(filename, dataObj) {
+            if (!isOwnerYad3k0()) return;
+            const jsonStr = JSON.stringify(dataObj, null, 2);
+            try {
+                const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(url), 1500);
+                copyText(jsonStr);
+                sfxSuccess();
+                showToast(`Файл ${filename} сохранён (и JSON скопирован в буфер)`, 'success');
+            } catch {
+                copyText(jsonStr);
+                showToast('JSON режима скопирован в буфер обмена!', 'info');
+            }
+        }
+
+        function openModeUploadModal() {
+            if (!isOwnerYad3k0()) return;
+            openModal(`
+                <div class="flex items-center justify-between mb-3">
+                    <div class="font-extrabold text-base">📥 Загрузка режима (yad3k0⁴²)</div>
+                    <button onclick="window.__closeModal()" class="w-8 h-8 rounded-full btn-secondary text-sm font-bold">✕</button>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <p class="leading-relaxed" style="color: var(--text-muted);">
+                        Поддерживаются:<br>
+                        • <b>.json</b> (экспорт Mini App или <b>custom_data.json</b> из старого бота)<br>
+                        • <b>.txt</b> (слова через запятую/перенос, пары формата <code>Слово1:Слово2</code>)
+                    </p>
+                    <input id="mode-file-picker" type="file" accept=".json,.txt,application/json,text/plain" class="hidden">
+                    <button id="mode-pick-file-btn" class="w-full py-3.5 rounded-2xl btn-primary font-extrabold text-sm">📂 Выбрать файл с телефона</button>
+
+                    <div class="pt-1 border-t" style="border-color: var(--border-color);">
+                        <label class="block text-[11px] font-bold mb-1" style="color: var(--text-muted);">Или вставь текст / JSON режима вручную:</label>
+                        <textarea id="mode-paste-area" rows="5" placeholder="# Название режима&#10;Ледяной голем:Голем&#10;Бочка с варваром:Бревно" class="w-full px-3 py-2.5 rounded-xl field-input text-xs font-mono"></textarea>
+                        <button id="mode-import-text-btn" class="w-full mt-2 py-3 rounded-xl btn-secondary font-extrabold text-xs">✅ Импортировать текст / JSON</button>
+                    </div>
+                </div>
+            `);
+
+            const fileInput = document.getElementById('mode-file-picker');
+            const pickBtn = document.getElementById('mode-pick-file-btn');
+            const pasteArea = document.getElementById('mode-paste-area');
+            const importTextBtn = document.getElementById('mode-import-text-btn');
+
+            if (pickBtn && fileInput) {
+                pickBtn.onclick = () => fileInput.click();
+                fileInput.onchange = () => {
+                    const file = fileInput.files && fileInput.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        const count = importModeFromText(String(reader.result || ''), file.name);
+                        if (count > 0) {
+                            sfxSuccess();
+                            haptic('success');
+                            closeModal();
+                            showToast(`Загружено режимов: ${count}!`, 'success');
+                            render();
+                        } else {
+                            showToast('Не удалось прочитать режим (нужно минимум 2 слова)', 'error');
+                        }
+                    };
+                    reader.readAsText(file, 'utf-8');
+                };
+            }
+
+            if (importTextBtn && pasteArea) {
+                importTextBtn.onclick = () => {
+                    const count = importModeFromText(pasteArea.value, 'Свой режим');
+                    if (count > 0) {
+                        sfxSuccess();
+                        haptic('success');
+                        closeModal();
+                        showToast(`Загружено режимов: ${count}!`, 'success');
+                        render();
+                    } else {
+                        showToast('Вставь корректный JSON или минимум 2 слова', 'warn');
+                    }
+                };
+            }
+        }
+
+        window.__closeModal = closeModal;
+
+        function openRulesModal() {
+            openModal(`
+                <div class="flex items-center justify-between mb-3">
+                    <div class="font-extrabold text-base">📖 Правила игры «Шпион»</div>
+                    <button onclick="window.__closeModal()" class="w-8 h-8 rounded-full btn-secondary text-sm font-bold">✕</button>
+                </div>
+                <div class="space-y-3 text-xs leading-relaxed" style="color: var(--text-muted);">
+                    <div class="p-3 rounded-2xl" style="background: var(--bg-input);">
+                        <div class="font-extrabold text-sm mb-1" style="color: var(--text-main);">🕵️‍♂️ Обычный режим</div>
+                        Все мирные получают одну и ту же карту/слово, а шпион не знает слово. Игроки по очереди задают вопросы или описывают карту, не называя её напрямую. Задача мирных — вычислить шпиона, задача шпиона — не спалиться или угадать слово.
+                    </div>
+                    <div class="p-3 rounded-2xl" style="background: var(--bg-input);">
+                        <div class="font-extrabold text-sm mb-1" style="color: var(--text-main);">🎭 Режим «Под прикрытием»</div>
+                        Шпион получает <b>похожую</b>, но другую карту (например, «Голем» вместо «Ледяного голема») и <b>сам не знает, что он шпион</b>! Понять свою роль можно только в процессе обсуждения.
+                    </div>
+                    <div class="p-3 rounded-2xl" style="background: var(--bg-input);">
+                        <div class="font-extrabold text-sm mb-1" style="color: var(--text-main);">🔥 Последний шанс и Ва-банк</div>
+                        В обычном режиме шпион может в любой момент нажать «Назвать слово» и рискнуть. А если шпиона поймали на голосовании, у него есть 1 последняя попытка назвать слово мирных, чтобы украсть победу!
+                    </div>
+                </div>
+            `);
+        }
+
+        function openSpyGuessModal(isPassPlay = false) {
             openModal(`
                 <div class="flex items-center justify-between mb-3">
                     <div class="font-extrabold text-base">💡 Догадка шпиона (Ва-банк)</div>
                     <button onclick="window.__closeModal()" class="w-8 h-8 rounded-full btn-secondary text-sm font-bold">✕</button>
                 </div>
-                <p class="text-xs mb-3 leading-relaxed" style="color: var(--text-muted);">
-                    Если угадаешь загаданное слово мирных — <b>победишь досрочно</b>. Если ошибёшься — сразу раскроешься и проиграешь!
-                </p>
-                <input id="early-guess-input" type="text" placeholder="Введи слово..." class="w-full px-4 py-3 rounded-2xl field-input text-sm font-bold mb-3">
-                <button id="early-guess-submit" class="w-full py-3.5 rounded-2xl btn-primary font-extrabold text-sm">⚡ Рискнуть и назвать</button>
+                <div class="space-y-3 text-xs">
+                    <p class="leading-relaxed" style="color: var(--text-muted);">
+                        Напиши название карты/слова мирных. Если угадаешь — сразу победишь, но если ошибёшься — раунд сразу закончится победой мирных!
+                    </p>
+                    <input id="spy-guess-input" type="text" placeholder="Введи слово..." class="w-full px-3.5 py-3 rounded-xl field-input text-sm font-bold">
+                    <button id="spy-guess-submit" class="w-full py-3.5 rounded-2xl btn-primary font-extrabold text-sm">🎯 Подтвердить догадку</button>
+                </div>
             `);
 
-            document.getElementById('early-guess-submit').onclick = () => {
-                const word = document.getElementById('early-guess-input').value.trim();
+            const inp = document.getElementById('spy-guess-input');
+            const btn = document.getElementById('spy-guess-submit');
+            const submit = () => {
+                const word = (inp ? inp.value : '').trim();
                 if (!word) { showToast('Введи слово!', 'warn'); return; }
                 closeModal();
-                if (isOffline) {
+                if (isPassPlay) {
                     const win = normWord(word) === normWord(passGame.card);
-                    stopTimerLoop();
-                    passGame.stage = 'results';
-                    passGame.resultData = {
-                        winner: win ? 'spy' : 'civilians',
-                        headline: win ? '⚡ Шпион угадал досрочно!' : '💥 Шпион ошибся!',
-                        subtext: `Шпион пошёл ва-банк и назвал «${word}» — ${win ? 'ТОЧНО В ЦЕЛЬ!' : 'НЕВЕРНО! Мирные победили!'}`,
-                        spyNames: passGame.spyIndices.map(i => passGame.players[i])
-                    };
-                    win ? sfxAlert() : sfxSuccess();
-                    render();
+                    finishPassPlayResults(
+                        win ? 'spy' : 'civilians',
+                        win ? '⚡ Шпион угадал досрочно!' : '🎉 Мирные победили!',
+                        `Шпион пошёл ва-банк и назвал «${word}» — ${win ? 'ТОЧНО В ЦЕЛЬ!' : 'ОШИБСЯ!'}`
+                    );
                 } else {
-                    sendToHost({ type: 'spy_guess', uid: currentUser.id, word });
+                    sendToHost({ type: 'spy_guess', word, uid: currentUser.id });
                 }
             };
+            if (btn) btn.onclick = submit;
+            if (inp) inp.onkeydown = (e) => { if (e.key === 'Enter') submit(); };
+        }
+
+        function finishPassPlayResults(winner, headline, subtext) {
+            passGame.timerRunning = false;
+            stopTimerLoop();
+            passGame.stage = 'results';
+            passGame.resultData = {
+                winner,
+                headline,
+                subtext,
+                spyNames: passGame.spyIndices.map(i => passGame.players[i])
+            };
+            winner === 'civilians' ? sfxSuccess() : sfxAlert();
+            haptic(winner === 'civilians' ? 'success' : 'warning');
+            render();
         }
 
         // =========================================================================
-        // 11. ПРИВЯЗКА СОБЫТИЙ ТЕКУЩЕГО ЭКРАНА
+        // 11. ПРИВЯЗКА СОБЫТИЙ АКТИВНОГО ЭКРАНА И ЗАПУСК
         // =========================================================================
         function bindCurrentViewEvents() {
+            // --- ЭКРАН: ГЛАВНАЯ ---
             if (activeView === 'home') {
                 const btnCreate = document.getElementById('btn-create-online');
-                const btnJoin = document.getElementById('btn-join-online');
-                const codeInput = document.getElementById('input-room-code');
-                const btnPass = document.getElementById('btn-open-passplay');
-                const btnRef = document.getElementById('btn-refresh-lobby');
-
                 if (btnCreate) btnCreate.onclick = () => { sfxClick(); createOnlineRoom(); };
-                if (btnJoin) btnJoin.onclick = () => { sfxClick(); joinOnlineRoom(codeInput.value); };
-                if (codeInput) codeInput.onkeydown = (e) => { if (e.key === 'Enter') joinOnlineRoom(codeInput.value); };
-                if (btnPass) btnPass.onclick = () => { sfxClick(); openPassPlaySetup(); };
-                if (btnRef) btnRef.onclick = () => {
-                    sfxClick();
-                    if (!lobbyDir.client) initOpenRoomsDirectory();
-                    render();
-                    showToast('Список открытых комнат обновлён', 'info');
-                };
 
-                document.querySelectorAll('[data-rejoin]').forEach(btn => {
-                    btn.onclick = () => { sfxClick(); joinOnlineRoom(btn.dataset.rejoin); };
+                const inpCode = document.getElementById('input-room-code');
+                const btnJoin = document.getElementById('btn-join-online');
+                if (btnJoin && inpCode) {
+                    btnJoin.onclick = () => { sfxClick(); joinOnlineRoom(inpCode.value); };
+                    inpCode.onkeydown = (e) => { if (e.key === 'Enter') joinOnlineRoom(inpCode.value); };
+                }
+
+                const btnRefresh = document.getElementById('btn-refresh-lobby');
+                if (btnRefresh) {
+                    btnRefresh.onclick = () => {
+                        sfxClick();
+                        haptic('light');
+                        if (!lobbyDir.client) initOpenRoomsDirectory();
+                        render();
+                        showToast('Список комнат обновлён', 'info');
+                    };
+                }
+
+                const btnPass = document.getElementById('btn-open-passplay');
+                if (btnPass) btnPass.onclick = () => { sfxClick(); openPassPlaySetup(); };
+
+                document.querySelectorAll('[data-rejoin]').forEach(b => {
+                    b.onclick = () => { sfxClick(); joinOnlineRoom(b.dataset.rejoin); };
                 });
             }
 
+            // --- ЭКРАН: ОНЛАЙН КОМНАТА ---
             if (activeView === 'online_room') {
-                const copyBtn = document.getElementById('btn-copy-code');
-                if (copyBtn) copyBtn.onclick = () => {
-                    if (copyText(clientView.code)) showToast(`Код ${clientView.code} скопирован!`, 'success');
-                    haptic('light');
-                };
+                const btnLeave = document.getElementById('btn-leave-online');
+                if (btnLeave) btnLeave.onclick = () => { sfxClick(); leaveOnlineRoom(); };
 
-                const shareBtn = document.getElementById('btn-share-link');
-                if (shareBtn) shareBtn.onclick = () => {
-                    const cleanBot = (appSettings.botUsername || '').replace(/^@/, '').trim();
-                    const link = cleanBot
-                        ? `https://t.me/${cleanBot}?startapp=${clientView.code}`
-                        : `${window.location.origin}${window.location.pathname}?room=${clientView.code}`;
-                    copyText(link);
-                    showToast('Ссылка-приглашение скопирована!', 'success');
-                    haptic('light');
-                };
+                const btnCopy = document.getElementById('btn-copy-code');
+                if (btnCopy && clientView) {
+                    btnCopy.onclick = () => {
+                        copyText(clientView.code);
+                        sfxClick();
+                        haptic('light');
+                        showToast(`Код ${clientView.code} скопирован!`, 'success');
+                    };
+                }
 
-                const cfgBtn = document.getElementById('btn-room-settings');
-                if (cfgBtn) cfgBtn.onclick = () => { sfxClick(); openRoomSettingsModal(); };
+                const btnShare = document.getElementById('btn-share-link');
+                if (btnShare && clientView) {
+                    btnShare.onclick = () => {
+                        sfxClick();
+                        const botUser = (appSettings.botUsername || '').replace(/^@/, '').trim();
+                        const link = botUser
+                            ? `https://t.me/${botUser}?startapp=${clientView.code}`
+                            : `${window.location.origin}${window.location.pathname}?room=${clientView.code}`;
+                        const shareText = `Заходи в игру «Шпион»! Комната: ${clientView.title} (Код: ${clientView.code})`;
+                        if (tg && tg.openTelegramLink && botUser) {
+                            tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(shareText)}`);
+                        } else {
+                            copyText(`${shareText}\n${link}`);
+                            showToast('Ссылка-приглашение скопирована!', 'success');
+                        }
+                    };
+                }
 
-                const startBtn = document.getElementById('btn-start-online');
-                if (startBtn) startBtn.onclick = () => startOnlineRound();
+                const btnRoomCfg = document.getElementById('btn-room-settings');
+                if (btnRoomCfg) btnRoomCfg.onclick = () => { sfxClick(); openRoomSettingsModal(); };
 
-                const leaveBtn = document.getElementById('btn-leave-online');
-                if (leaveBtn) leaveBtn.onclick = () => { sfxClick(); leaveOnlineRoom(); };
+                const btnStart = document.getElementById('btn-start-online');
+                if (btnStart) btnStart.onclick = () => { sfxClick(); startOnlineRound(); };
 
-                const backLobbyBtn = document.getElementById('btn-back-lobby');
-                if (backLobbyBtn) backLobbyBtn.onclick = () => { sfxClick(); returnOnlineToLobby(); };
+                const btnBackLobby = document.getElementById('btn-back-lobby');
+                if (btnBackLobby) btnBackLobby.onclick = () => { sfxClick(); returnOnlineToLobby(); };
 
-                const roleCard = document.getElementById('role-card-toggle');
-                const toggleBtn = document.getElementById('btn-toggle-role-explicit');
-                if (roleCard) {
+                const cardToggle = document.getElementById('role-card-toggle');
+                if (cardToggle) {
                     if (appSettings.holdToReveal) {
-                        roleCard.onpointerdown = () => { roleHidden = false; render(); };
-                        roleCard.onpointerup = () => { roleHidden = true; render(); };
-                        roleCard.onpointerleave = () => { if (!roleHidden) { roleHidden = true; render(); } };
+                        cardToggle.onpointerdown = (e) => {
+                            if (!roleHidden) return;
+                            e.preventDefault();
+                            roleHidden = false;
+                            sfxClick();
+                            render();
+                            const hideBack = () => {
+                                window.removeEventListener('pointerup', hideBack);
+                                window.removeEventListener('pointercancel', hideBack);
+                                roleHidden = true;
+                                render();
+                            };
+                            window.addEventListener('pointerup', hideBack);
+                            window.addEventListener('pointercancel', hideBack);
+                        };
                     } else {
-                        roleCard.onclick = () => { roleHidden = !roleHidden; sfxClick(); haptic('light'); render(); };
+                        cardToggle.onclick = () => { roleHidden = !roleHidden; sfxClick(); render(); };
                     }
                 }
-                if (toggleBtn) toggleBtn.onclick = () => { roleHidden = !roleHidden; sfxClick(); haptic('light'); render(); };
 
-                const openVoteBtn = document.getElementById('btn-open-vote');
-                if (openVoteBtn) openVoteBtn.onclick = () => { showVotePanel = !showVotePanel; sfxClick(); render(); };
+                const btnToggleRole = document.getElementById('btn-toggle-role-explicit');
+                if (btnToggleRole) btnToggleRole.onclick = () => { roleHidden = !roleHidden; sfxClick(); render(); };
 
-                const closeVoteBtn = document.getElementById('btn-close-vote');
-                if (closeVoteBtn) closeVoteBtn.onclick = () => { showVotePanel = false; sfxClick(); render(); };
+                const btnOpenVote = document.getElementById('btn-open-vote');
+                if (btnOpenVote) btnOpenVote.onclick = () => { showVotePanel = !showVotePanel; sfxClick(); render(); };
+
+                const btnCloseVote = document.getElementById('btn-close-vote');
+                if (btnCloseVote) btnCloseVote.onclick = () => { showVotePanel = false; sfxClick(); render(); };
 
                 document.querySelectorAll('[data-vote-id]').forEach(b => {
                     b.onclick = () => {
                         sfxClick();
-                        haptic('medium');
-                        sendToHost({ type: 'vote', uid: currentUser.id, targetId: b.dataset.voteId });
-                        showToast('Голос принят!', 'success');
+                        haptic('light');
+                        sendToHost({ type: 'vote', targetId: b.dataset.voteId, uid: currentUser.id });
+                        showToast('Голос принят!', 'info');
                     };
                 });
 
-                const earlyBtn = document.getElementById('btn-spy-early-guess');
-                if (earlyBtn) earlyBtn.onclick = () => { sfxClick(); openEarlyGuessModal(false); };
+                const btnEarlyGuess = document.getElementById('btn-spy-early-guess');
+                if (btnEarlyGuess) btnEarlyGuess.onclick = () => { sfxClick(); openSpyGuessModal(false); };
 
-                const finishBtn = document.getElementById('btn-host-finish');
-                if (finishBtn) finishBtn.onclick = () => { sfxClick(); finishOnlineVoting(false); };
+                const btnFinish = document.getElementById('btn-host-finish');
+                if (btnFinish) btnFinish.onclick = () => { sfxClick(); finishOnlineVoting(false); };
 
-                const lcSubmit = document.getElementById('btn-submit-last-chance');
-                if (lcSubmit) lcSubmit.onclick = () => {
-                    const w = document.getElementById('input-last-chance').value.trim();
-                    if (!w) { showToast('Напиши слово!', 'warn'); return; }
-                    sendToHost({ type: 'spy_guess', uid: currentUser.id, word: w });
-                };
+                const btnSubmitLC = document.getElementById('btn-submit-last-chance');
+                const inpLC = document.getElementById('input-last-chance');
+                if (btnSubmitLC && inpLC) {
+                    const sendLC = () => {
+                        const word = inpLC.value.trim();
+                        if (!word) { showToast('Введи слово!', 'warn'); return; }
+                        sendToHost({ type: 'spy_guess', word, uid: currentUser.id });
+                    };
+                    btnSubmitLC.onclick = sendLC;
+                    inpLC.onkeydown = (e) => { if (e.key === 'Enter') sendLC(); };
+                }
 
-                const lcSkip = document.getElementById('btn-skip-last-chance');
-                if (lcSkip) lcSkip.onclick = () => { sfxClick(); finishOnlineVoting(true); };
+                const btnSkipLC = document.getElementById('btn-skip-last-chance');
+                if (btnSkipLC) btnSkipLC.onclick = () => { sfxClick(); finishOnlineVoting(true); };
             }
 
+            // --- ЭКРАН: НА ОДНОМ ТЕЛЕФОНЕ (PASS & PLAY) ---
             if (activeView === 'pass_play') {
-                const exitBtn = document.getElementById('pp-exit');
-                if (exitBtn) exitBtn.onclick = () => { stopTimerLoop(); passGame.active = false; activeView = 'home'; render(); };
+                const btnExit = document.getElementById('pp-exit');
+                if (btnExit) {
+                    btnExit.onclick = () => {
+                        sfxClick();
+                        stopTimerLoop();
+                        passGame.active = false;
+                        activeView = 'home';
+                        render();
+                    };
+                }
 
-                const packSel = document.getElementById('pp-pack');
-                if (packSel) packSel.onchange = () => {
-                    passGame.packId = packSel.value;
-                    passDefaults.packId = passGame.packId;
-                    persistPassDefaults();
-                };
+                const selPack = document.getElementById('pp-pack');
+                if (selPack) {
+                    selPack.onchange = () => {
+                        passGame.packId = selPack.value;
+                        persistPassDefaults();
+                        render();
+                    };
+                }
 
-                const mClassic = document.getElementById('pp-mode-classic');
-                const mUnder = document.getElementById('pp-mode-under');
-                if (mClassic) mClassic.onclick = () => { passGame.mode = 'classic'; passDefaults.mode = 'classic'; persistPassDefaults(); sfxClick(); render(); };
-                if (mUnder) mUnder.onclick = () => { passGame.mode = 'undercover'; passDefaults.mode = 'undercover'; persistPassDefaults(); sfxClick(); render(); };
+                const btnMClassic = document.getElementById('pp-mode-classic');
+                if (btnMClassic) btnMClassic.onclick = () => { passGame.mode = 'classic'; sfxClick(); persistPassDefaults(); render(); };
 
-                document.querySelectorAll('[data-pp-spy]').forEach(b => b.onclick = () => { passGame.spyCount = Number(b.dataset.ppSpy); passDefaults.spyCount = passGame.spyCount; persistPassDefaults(); sfxClick(); render(); });
-                document.querySelectorAll('[data-pp-timer]').forEach(b => b.onclick = () => { passGame.timerMin = Number(b.dataset.ppTimer); passDefaults.timerMin = passGame.timerMin; persistPassDefaults(); sfxClick(); render(); });
+                const btnMUnder = document.getElementById('pp-mode-under');
+                if (btnMUnder) btnMUnder.onclick = () => { passGame.mode = 'undercover'; sfxClick(); persistPassDefaults(); render(); };
+
+                document.querySelectorAll('[data-pp-spy]').forEach(b => {
+                    b.onclick = () => { passGame.spyCount = Number(b.dataset.ppSpy); sfxClick(); persistPassDefaults(); render(); };
+                });
+                document.querySelectorAll('[data-pp-timer]').forEach(b => {
+                    b.onclick = () => { passGame.timerMin = Number(b.dataset.ppTimer); sfxClick(); persistPassDefaults(); render(); };
+                });
+
+                const btnAddP = document.getElementById('pp-add-player');
+                if (btnAddP) {
+                    btnAddP.onclick = () => {
+                        if (passGame.players.length >= 12) { showToast('Максимум 12 игроков', 'warn'); return; }
+                        passGame.players.push(`Игрок ${passGame.players.length + 1}`);
+                        persistPassDefaults();
+                        sfxClick();
+                        render();
+                    };
+                }
 
                 document.querySelectorAll('[data-pp-name]').forEach(inp => {
-                    inp.oninput = () => { passGame.players[Number(inp.dataset.ppName)] = inp.value; persistPassDefaults(); };
-                });
-                document.querySelectorAll('[data-pp-del]').forEach(btn => {
-                    btn.onclick = () => { passGame.players.splice(Number(btn.dataset.ppDel), 1); persistPassDefaults(); sfxClick(); render(); };
-                });
-
-                const addP = document.getElementById('pp-add-player');
-                if (addP) addP.onclick = () => {
-                    if (passGame.players.length >= 12) { showToast('Максимум 12 игроков', 'warn'); return; }
-                    passGame.players.push(`Игрок ${passGame.players.length + 1}`);
-                    persistPassDefaults();
-                    sfxClick();
-                    render();
-                };
-
-                const startPP = document.getElementById('pp-start');
-                if (startPP) startPP.onclick = () => startPassPlayRound();
-
-                const revBtn = document.getElementById('pp-reveal-btn');
-                if (revBtn) revBtn.onclick = () => { passGame.cardRevealed = true; sfxReveal(); haptic('medium'); render(); };
-
-                const nextP = document.getElementById('pp-next-player');
-                if (nextP) nextP.onclick = () => {
-                    sfxClick();
-                    if (passGame.currentIdx + 1 < passGame.players.length) {
-                        passGame.currentIdx++;
-                        passGame.cardRevealed = false;
-                    } else {
-                        passGame.stage = 'discuss';
-                        if (passGame.timerMin > 0) {
-                            passGame.timerRunning = true;
-                            ensureTimerLoop();
-                        }
-                    }
-                    render();
-                };
-
-                const tToggle = document.getElementById('pp-timer-toggle');
-                if (tToggle) tToggle.onclick = () => {
-                    passGame.timerRunning = !passGame.timerRunning;
-                    passGame.timerRunning ? ensureTimerLoop() : stopTimerLoop();
-                    sfxClick();
-                    render();
-                };
-
-                const tPlus = document.getElementById('pp-timer-plus');
-                if (tPlus) tPlus.onclick = () => { passGame.timerSecLeft += 60; sfxClick(); render(); };
-
-                const goVote = document.getElementById('pp-go-vote');
-                if (goVote) goVote.onclick = () => { stopTimerLoop(); passGame.timerRunning = false; passGame.stage = 'vote'; sfxClick(); render(); };
-
-                const ppEarly = document.getElementById('pp-early-guess');
-                if (ppEarly) ppEarly.onclick = () => { sfxClick(); openEarlyGuessModal(true); };
-
-                const ppAbort = document.getElementById('pp-abort');
-                if (ppAbort) ppAbort.onclick = () => {
-                    stopTimerLoop();
-                    passGame.stage = 'results';
-                    passGame.resultData = {
-                        winner: 'spy',
-                        headline: '🏁 Раунд завершён',
-                        subtext: 'Роли раскрыты досрочно.',
-                        spyNames: passGame.spyIndices.map(i => passGame.players[i])
+                    inp.oninput = () => {
+                        const idx = Number(inp.dataset.ppName);
+                        passGame.players[idx] = inp.value;
+                        saveJson(STORAGE_KEYS.LOCAL_PLAYERS, passGame.players);
                     };
-                    render();
-                };
+                });
 
-                const backDisc = document.getElementById('pp-back-discuss');
-                if (backDisc) backDisc.onclick = () => { passGame.stage = 'discuss'; sfxClick(); render(); };
+                document.querySelectorAll('[data-pp-del]').forEach(b => {
+                    b.onclick = () => {
+                        const idx = Number(b.dataset.ppDel);
+                        passGame.players.splice(idx, 1);
+                        persistPassDefaults();
+                        sfxClick();
+                        render();
+                    };
+                });
 
-                document.querySelectorAll('[data-pp-kick]').forEach(btn => {
-                    btn.onclick = () => {
-                        const idx = Number(btn.dataset.ppKick);
+                const btnPPStart = document.getElementById('pp-start');
+                if (btnPPStart) btnPPStart.onclick = () => { sfxClick(); startPassPlayRound(); };
+
+                const btnReveal = document.getElementById('pp-reveal-btn');
+                if (btnReveal) {
+                    btnReveal.onclick = () => {
+                        passGame.cardRevealed = true;
+                        sfxReveal();
+                        haptic('medium');
+                        render();
+                    };
+                }
+
+                const btnNextP = document.getElementById('pp-next-player');
+                if (btnNextP) {
+                    btnNextP.onclick = () => {
+                        sfxClick();
+                        if (passGame.currentIdx + 1 < passGame.players.length) {
+                            passGame.currentIdx++;
+                            passGame.cardRevealed = false;
+                            render();
+                        } else {
+                            passGame.stage = 'discuss';
+                            passGame.timerRunning = passGame.timerMin > 0;
+                            ensureTimerLoop();
+                            render();
+                        }
+                    };
+                }
+
+                const btnTimerToggle = document.getElementById('pp-timer-toggle');
+                if (btnTimerToggle) {
+                    btnTimerToggle.onclick = () => {
+                        passGame.timerRunning = !passGame.timerRunning;
+                        sfxClick();
+                        ensureTimerLoop();
+                        render();
+                    };
+                }
+
+                const btnTimerPlus = document.getElementById('pp-timer-plus');
+                if (btnTimerPlus) {
+                    btnTimerPlus.onclick = () => {
+                        passGame.timerSecLeft += 60;
+                        sfxClick();
+                        render();
+                    };
+                }
+
+                const btnGoVote = document.getElementById('pp-go-vote');
+                if (btnGoVote) {
+                    btnGoVote.onclick = () => {
+                        passGame.timerRunning = false;
+                        stopTimerLoop();
+                        passGame.stage = 'vote';
+                        sfxClick();
+                        render();
+                    };
+                }
+
+                const btnPPEarly = document.getElementById('pp-early-guess');
+                if (btnPPEarly) btnPPEarly.onclick = () => { sfxClick(); openSpyGuessModal(true); };
+
+                const btnAbort = document.getElementById('pp-abort');
+                if (btnAbort) {
+                    btnAbort.onclick = () => {
+                        finishPassPlayResults('spy', '🏁 Роли раскрыты', 'Раунд завершён досрочно.');
+                    };
+                }
+
+                const btnBackDiscuss = document.getElementById('pp-back-discuss');
+                if (btnBackDiscuss) {
+                    btnBackDiscuss.onclick = () => {
+                        passGame.stage = 'discuss';
+                        sfxClick();
+                        ensureTimerLoop();
+                        render();
+                    };
+                }
+
+                document.querySelectorAll('[data-pp-kick]').forEach(b => {
+                    b.onclick = () => {
+                        const idx = Number(b.dataset.ppKick);
                         passGame.votedOutIdx = idx;
                         if (passGame.spyIndices.includes(idx)) {
                             passGame.stage = 'last_chance';
                             sfxAlert();
                             haptic('warning');
+                            render();
                         } else {
-                            passGame.stage = 'results';
-                            passGame.resultData = {
-                                winner: 'spy',
-                                headline: '🕵️‍♂️ Шпион победил!',
-                                subtext: `Вы выгнали мирного игрока (${passGame.players[idx]})!`,
-                                spyNames: passGame.spyIndices.map(i => passGame.players[i])
-                            };
-                            sfxAlert();
+                            const kickedName = passGame.players[idx] || 'Игрок';
+                            finishPassPlayResults('spy', '🕵️‍♂️ Шпион победил!', `Выгнали мирного игрока (${kickedName})!`);
                         }
-                        render();
                     };
                 });
 
-                const lcSub = document.getElementById('pp-lc-submit');
-                if (lcSub) lcSub.onclick = () => {
-                    const word = document.getElementById('pp-lc-input').value.trim();
-                    if (!word) { showToast('Введи слово!', 'warn'); return; }
-                    const win = normWord(word) === normWord(passGame.card);
-                    passGame.stage = 'results';
-                    passGame.resultData = {
-                        winner: win ? 'spy' : 'civilians',
-                        headline: win ? '😱 Шпион украл победу!' : '🎉 Мирные победили!',
-                        subtext: `Шпион назвал «${word}» — ${win ? 'И УГАДАЛ!' : 'НЕВЕРНО!'}`,
-                        spyNames: passGame.spyIndices.map(i => passGame.players[i])
+                const btnLCSubmit = document.getElementById('pp-lc-submit');
+                const inpPPLC = document.getElementById('pp-lc-input');
+                if (btnLCSubmit && inpPPLC) {
+                    const checkLC = () => {
+                        const word = inpPPLC.value.trim();
+                        if (!word) { showToast('Введи слово!', 'warn'); return; }
+                        const win = normWord(word) === normWord(passGame.card);
+                        finishPassPlayResults(
+                            win ? 'spy' : 'civilians',
+                            win ? '😱 Шпион украл победу!' : '🎉 Мирные победили!',
+                            `В последний шанс шпион назвал «${word}» — ${win ? 'И УГАДАЛ!' : 'НЕВЕРНО!'}`
+                        );
                     };
-                    win ? sfxAlert() : sfxSuccess();
-                    render();
-                };
+                    btnLCSubmit.onclick = checkLC;
+                    inpPPLC.onkeydown = (e) => { if (e.key === 'Enter') checkLC(); };
+                }
 
-                const lcSkip = document.getElementById('pp-lc-skip');
-                if (lcSkip) lcSkip.onclick = () => {
-                    passGame.stage = 'results';
-                    passGame.resultData = {
-                        winner: 'civilians',
-                        headline: '🎉 Мирные победили!',
-                        subtext: 'Шпион сдался и не смог назвать слово.',
-                        spyNames: passGame.spyIndices.map(i => passGame.players[i])
+                const btnLCSkip = document.getElementById('pp-lc-skip');
+                if (btnLCSkip) {
+                    btnLCSkip.onclick = () => {
+                        finishPassPlayResults('civilians', '🎉 Мирные победили!', 'Шпион был пойман и сдался.');
                     };
-                    sfxSuccess();
-                    render();
-                };
+                }
 
-                const ppReplay = document.getElementById('pp-replay');
-                if (ppReplay) ppReplay.onclick = () => startPassPlayRound();
+                const btnReplay = document.getElementById('pp-replay');
+                if (btnReplay) btnReplay.onclick = () => { sfxClick(); startPassPlayRound(); };
 
-                const ppToSetup = document.getElementById('pp-to-setup');
-                if (ppToSetup) ppToSetup.onclick = () => { passGame.stage = 'setup'; sfxClick(); render(); };
+                const btnToSetup = document.getElementById('pp-to-setup');
+                if (btnToSetup) btnToSetup.onclick = () => { passGame.stage = 'setup'; sfxClick(); render(); };
             }
 
+            // --- ЭКРАН: НАБОРЫ ---
             if (activeView === 'packs') {
                 const btnNew = document.getElementById('btn-new-pack');
                 if (btnNew) btnNew.onclick = () => { sfxClick(); openPackEditorModal(); };
+
+                if (isOwnerYad3k0()) {
+                    const btnUpload = document.getElementById('btn-upload-mode');
+                    if (btnUpload) btnUpload.onclick = () => { sfxClick(); openModeUploadModal(); };
+
+                    const btnExportAll = document.getElementById('btn-export-all-modes');
+                    if (btnExportAll) btnExportAll.onclick = () => {
+                        if (!Object.keys(customPacks).length) return;
+                        exportModeJsonFile('spy_modes_backup.json', { packs: customPacks });
+                    };
+
+                    document.querySelectorAll('[data-export-pack]').forEach(b => {
+                        b.onclick = () => {
+                            const pk = customPacks[b.dataset.exportPack];
+                            if (!pk) return;
+                            const safeName = pk.title.replace(/[^\wа-яА-ЯёЁ-]+/g, '_').replace(/^_+|_+$/g, '') || 'mode';
+                            exportModeJsonFile(`${safeName}.json`, pk);
+                        };
+                    });
+                }
+
                 document.querySelectorAll('[data-edit-pack]').forEach(b => {
                     b.onclick = () => { sfxClick(); openPackEditorModal(b.dataset.editPack); };
                 });
@@ -3787,22 +4155,24 @@
                 });
             }
 
+            // --- ЭКРАН: НАСТРОЙКИ ---
             if (activeView === 'settings') {
-                const nameInput = document.getElementById('set-player-name');
-                const saveNameAction = () => {
-                    if (!nameInput) return;
-                    const v = nameInput.value.trim();
-                    if (!v) return;
-                    currentUser.name = v.slice(0, 24);
-                    currentUser.customName = currentUser.name;
-                    persistUserProfile();
-                    sfxSuccess();
-                    showToast('Имя сохранено!', 'success');
-                    render();
-                };
-                const saveNameBtn = document.getElementById('btn-save-name');
-                if (saveNameBtn) saveNameBtn.onclick = saveNameAction;
-                if (nameInput) nameInput.onkeydown = (e) => { if (e.key === 'Enter') saveNameAction(); };
+                const btnSaveName = document.getElementById('btn-save-name');
+                const inpName = document.getElementById('set-player-name');
+                if (btnSaveName && inpName) {
+                    const saveName = () => {
+                        const val = inpName.value.trim();
+                        if (!val) { showToast('Имя не может быть пустым', 'warn'); return; }
+                        currentUser.name = val.slice(0, 24);
+                        currentUser.customName = currentUser.name;
+                        persistUserProfile();
+                        sfxSuccess();
+                        showToast('Имя сохранено!', 'success');
+                        render();
+                    };
+                    btnSaveName.onclick = saveName;
+                    inpName.onkeydown = (e) => { if (e.key === 'Enter') saveName(); };
+                }
 
                 document.querySelectorAll('[data-set-avatar]').forEach(b => {
                     b.onclick = () => {
@@ -3828,70 +4198,67 @@
                 document.querySelectorAll('[data-set-theme]').forEach(b => {
                     b.onclick = () => {
                         appSettings.theme = b.dataset.setTheme;
-                        if (appSettings.theme !== 'custom') appSettings.customAccent = '';
+                        persistSettings();
+                        applyTheme();
+                        sfxClick();
+                        haptic('light');
+                        render();
+                    };
+                });
+
+                document.querySelectorAll('[data-ct-key]').forEach(inp => {
+                    inp.oninput = () => {
+                        appSettings.customTheme[inp.dataset.ctKey] = inp.value;
+                        applyTheme();
+                    };
+                    inp.onchange = () => {
+                        appSettings.customTheme[inp.dataset.ctKey] = inp.value;
+                        persistSettings();
+                    };
+                });
+
+                const ctAlpha = document.getElementById('ct-alpha-slider');
+                const ctAlphaVal = document.getElementById('ct-alpha-val');
+                if (ctAlpha) {
+                    ctAlpha.oninput = () => {
+                        appSettings.customTheme.cardAlpha = Number(ctAlpha.value);
+                        if (ctAlphaVal) ctAlphaVal.textContent = `${ctAlpha.value}%`;
+                        applyTheme();
+                    };
+                    ctAlpha.onchange = () => persistSettings();
+                }
+
+                const btnCtRand = document.getElementById('btn-ct-random');
+                if (btnCtRand) {
+                    btnCtRand.onclick = () => {
+                        const randHex = (min, max) => '#' + [0, 1, 2].map(() => Math.floor(min + Math.random() * (max - min)).toString(16).padStart(2, '0')).join('');
+                        appSettings.customTheme = {
+                            bgMain: randHex(8, 34),
+                            bgCard: randHex(24, 58),
+                            textMain: '#f8fafc',
+                            textMuted: '#cbd5e1',
+                            accent: randHex(90, 245),
+                            accent2: randHex(90, 245),
+                            border: randHex(110, 240),
+                            cardAlpha: 72
+                        };
                         persistSettings();
                         applyTheme();
                         sfxClick();
                         render();
                     };
-                });
-
-                // Конструктор своей темы
-                document.querySelectorAll('[data-ct-key]').forEach(inp => {
-                    const key = inp.dataset.ctKey;
-                    inp.oninput = () => {
-                        appSettings.customTheme[key] = inp.value;
-                        persistSettings();
-                        applyTheme();
-                    };
-                    inp.onchange = () => {
-                        appSettings.customTheme[key] = inp.value;
-                        persistSettings();
-                        applyTheme();
-                        render();
-                    };
-                });
-
-                const ctAlphaSlider = document.getElementById('ct-alpha-slider');
-                const ctAlphaVal = document.getElementById('ct-alpha-val');
-                if (ctAlphaSlider) {
-                    ctAlphaSlider.oninput = () => {
-                        appSettings.customTheme.cardAlpha = Number(ctAlphaSlider.value);
-                        if (ctAlphaVal) ctAlphaVal.textContent = `${appSettings.customTheme.cardAlpha}%`;
-                        persistSettings();
-                        applyTheme();
-                    };
-                    ctAlphaSlider.onchange = () => persistSettings();
                 }
 
-                const ctRandBtn = document.getElementById('btn-ct-random');
-                if (ctRandBtn) ctRandBtn.onclick = () => {
-                    const randHex = (min, max) => '#' + [0,1,2].map(() => Math.floor(min + Math.random() * (max - min)).toString(16).padStart(2, '0')).join('');
-                    const darkBg = Math.random() > 0.25;
-                    appSettings.customTheme = {
-                        bgMain: darkBg ? randHex(8, 32) : randHex(232, 250),
-                        bgCard: darkBg ? randHex(20, 52) : '#ffffff',
-                        textMain: darkBg ? '#f8fafc' : '#0f172a',
-                        textMuted: darkBg ? '#94a3b8' : '#475569',
-                        accent: randHex(80, 245),
-                        accent2: randHex(80, 245),
-                        border: randHex(90, 220),
-                        cardAlpha: 78
+                const btnCtReset = document.getElementById('btn-ct-reset');
+                if (btnCtReset) {
+                    btnCtReset.onclick = () => {
+                        appSettings.customTheme = Object.assign({}, DEFAULT_CUSTOM_THEME);
+                        persistSettings();
+                        applyTheme();
+                        sfxClick();
+                        render();
                     };
-                    persistSettings();
-                    applyTheme();
-                    sfxClick();
-                    render();
-                };
-
-                const ctResetBtn = document.getElementById('btn-ct-reset');
-                if (ctResetBtn) ctResetBtn.onclick = () => {
-                    appSettings.customTheme = Object.assign({}, DEFAULT_CUSTOM_THEME);
-                    persistSettings();
-                    applyTheme();
-                    sfxClick();
-                    render();
-                };
+                }
 
                 document.querySelectorAll('[data-set-accent]').forEach(b => {
                     b.onclick = () => {
@@ -3903,14 +4270,14 @@
                     };
                 });
 
-                const colorInp = document.getElementById('set-custom-color');
-                if (colorInp) {
-                    colorInp.oninput = () => {
-                        appSettings.customAccent = colorInp.value;
-                        persistSettings();
+                const customColorInp = document.getElementById('set-custom-color');
+                if (customColorInp) {
+                    customColorInp.oninput = () => {
+                        appSettings.customAccent = customColorInp.value;
                         applyTheme();
                     };
-                    colorInp.onchange = () => {
+                    customColorInp.onchange = () => {
+                        appSettings.customAccent = customColorInp.value;
                         persistSettings();
                         render();
                     };
@@ -3958,48 +4325,36 @@
                     };
                 });
 
-                const botInput = document.getElementById('set-bot-user');
-                const saveBotAction = () => {
-                    if (!botInput) return;
-                    appSettings.botUsername = botInput.value.trim().replace(/^@/, '');
-                    persistSettings();
-                    sfxSuccess();
-                    showToast('Username бота сохранён!', 'success');
-                };
-                const saveBotBtn = document.getElementById('btn-save-bot');
-                if (saveBotBtn) saveBotBtn.onclick = saveBotAction;
-                if (botInput) botInput.onkeydown = (e) => { if (e.key === 'Enter') saveBotAction(); };
+                const btnSaveBot = document.getElementById('btn-save-bot');
+                const inpBot = document.getElementById('set-bot-user');
+                if (btnSaveBot && inpBot) {
+                    btnSaveBot.onclick = () => {
+                        appSettings.botUsername = inpBot.value.trim().replace(/^@/, '');
+                        persistSettings();
+                        sfxSuccess();
+                        showToast('Username бота сохранён!', 'success');
+                    };
+                }
 
-                const resetAllBtn = document.getElementById('btn-reset-all-settings');
-                if (resetAllBtn) resetAllBtn.onclick = () => {
-                    Object.assign(appSettings, JSON.parse(JSON.stringify(DEFAULT_SETTINGS)));
-                    persistSettings();
-                    applyTheme();
-                    sfxClick();
-                    showToast('Настройки сброшены по умолчанию', 'info');
-                    render();
-                };
+                const btnRules = document.getElementById('btn-show-rules');
+                if (btnRules) btnRules.onclick = () => { sfxClick(); openRulesModal(); };
 
-                const rulesBtn = document.getElementById('btn-show-rules');
-                if (rulesBtn) rulesBtn.onclick = () => {
-                    sfxClick();
-                    openModal(`
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="font-extrabold text-base">📖 Как играть</div>
-                            <button onclick="window.__closeModal()" class="w-8 h-8 rounded-full btn-secondary text-sm font-bold">✕</button>
-                        </div>
-                        <div class="space-y-3 text-xs leading-relaxed" style="color: var(--text-muted);">
-                            <p><b class="text-white">🕵️‍♂️ Обычный режим:</b> Все мирные получают одну и ту же карту/слово, а шпион не знает слово. Задавайте наводящие вопросы, чтобы вычислить шпиона, но не спалите слово!</p>
-                            <p><b class="text-white">🎭 Под прикрытием:</b> Мирные получают одну карту (например, <i>Ледяной голем</i>), а шпион получает очень похожую (<i>Голем</i>). Шпион сам не знает, что он шпион!</p>
-                            <p><b class="text-white">🔥 Последний шанс:</b> Если шпиона раскрыли на голосовании, у него есть последняя попытка назвать слово мирных. Угадает — победа его!</p>
-                        </div>
-                    `);
-                };
+                const btnResetAll = document.getElementById('btn-reset-all-settings');
+                if (btnResetAll) {
+                    btnResetAll.onclick = () => {
+                        Object.assign(appSettings, DEFAULT_SETTINGS);
+                        appSettings.customTheme = Object.assign({}, DEFAULT_CUSTOM_THEME);
+                        persistSettings();
+                        applyTheme();
+                        sfxClick();
+                        showToast('Настройки сброшены по умолчанию', 'info');
+                        render();
+                    };
+                }
 
-                const secretEmptyZone = document.getElementById('settings-secret-empty-zone');
-                if (secretEmptyZone) {
-                    secretEmptyZone.onclick = (e) => {
-                        e.preventDefault();
+                const secretZone = document.getElementById('settings-secret-empty-zone');
+                if (secretZone) {
+                    secretZone.onclick = (e) => {
                         e.stopPropagation();
                         handleSecretEmptyTap();
                     };
@@ -4007,34 +4362,30 @@
             }
         }
 
-        // =========================================================================
-        // 12. ИНИЦИАЛИЗАЦИЯ, НАВИГАЦИЯ, DEEP-LINK И ОБЛАЧНОЕ СОХРАНЕНИЕ
-        // =========================================================================
-        window.__closeModal = closeModal;
-
+        // Нижняя навигация
         document.querySelectorAll('.nav-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const target = btn.dataset.nav;
-                if (!target) return;
-                currentTab = target;
-                activeView = target;
+            btn.onclick = () => {
+                currentTab = btn.dataset.nav;
+                activeView = currentTab;
                 sfxClick();
                 haptic('light');
                 render();
-            });
+            };
         });
 
         let pendingDeepLinkCode = null;
 
         function checkDeepLink() {
-            let roomParam = null;
+            let roomParam = '';
             try {
-                const params = new URLSearchParams(window.location.search);
-                roomParam = params.get('room') || params.get('tgWebAppStartParam');
+                if (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
+                    roomParam = tg.initDataUnsafe.start_param;
+                }
+                if (!roomParam) {
+                    const params = new URLSearchParams(window.location.search);
+                    roomParam = params.get('room') || params.get('startapp') || '';
+                }
             } catch {}
-            if (!roomParam && tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
-                roomParam = tg.initDataUnsafe.start_param;
-            }
             if (roomParam) {
                 const code = String(roomParam).replace(/\D/g, '').slice(0, 4);
                 if (code.length === 4) {
