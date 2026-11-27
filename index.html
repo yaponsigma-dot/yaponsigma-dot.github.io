@@ -4,21 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Шпион — Telegram Mini App</title>
-    
-    <!-- Telegram WebApp SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- Telegram WebApp SDK (не блокирует отрисовку страницы) -->
+    <script src="https://telegram.org/js/telegram-web-app.js" async></script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- PeerJS для бесплатного P2P мультиплеера без собственного сервера -->
-    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-    <!-- Шрифт Inter -->
+    <!-- Шрифты (с поддержкой кириллицы) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Comfortaa:wght@500;700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&family=Montserrat:wght@500;700;800;900&family=Oswald:wght@500;700&family=Pixelify+Sans:wght@500;700&family=Playfair+Display:wght@600;800&family=Rubik:wght@500;700;800&display=swap" rel="stylesheet">
 
     <style>
+        /* Пиксельный шрифт Determination Old Cyrillic (Undertale / Deltarune RU) */
+        @font-face {
+            font-family: 'Determination Old Cyrillic';
+            src: url('https://cdn.jsdelivr.net/gh/StackTheFennec/Determination@master/Determination-Regular.otf') format('opentype'),
+                 url('https://raw.githubusercontent.com/StackTheFennec/Determination/master/Determination-Regular.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
         /* Базовые переменные тем оформления */
         :root {
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             --bg-main: #090d16;
             --bg-card: rgba(255, 255, 255, 0.045);
             --bg-card-solid: #111827;
@@ -73,10 +82,343 @@
             --accent-glow: rgba(59, 130, 246, 0.25);
         }
 
+        [data-theme="amoled"] {
+            --bg-main: #000000;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --bg-card-solid: #0a0a0c;
+            --bg-input: rgba(255, 255, 255, 0.08);
+            --border-color: rgba(255, 255, 255, 0.11);
+            --text-main: #ffffff;
+            --text-muted: #8b8b96;
+            --accent: #3b82f6;
+            --accent-2: #6366f1;
+            --accent-glow: rgba(59, 130, 246, 0.24);
+        }
+
+        [data-theme="clash"] {
+            --bg-main: #0a1428;
+            --bg-card: rgba(30, 64, 130, 0.28);
+            --bg-card-solid: #102040;
+            --bg-input: rgba(251, 191, 36, 0.09);
+            --border-color: rgba(251, 191, 36, 0.28);
+            --text-main: #fffbeb;
+            --text-muted: #93c5fd;
+            --accent: #f59e0b;
+            --accent-2: #ea580c;
+            --accent-glow: rgba(245, 158, 11, 0.34);
+        }
+
+        [data-theme="brawl"] {
+            --bg-main: #130826;
+            --bg-card: rgba(124, 58, 237, 0.16);
+            --bg-card-solid: #1d0d3a;
+            --bg-input: rgba(250, 204, 21, 0.1);
+            --border-color: rgba(167, 139, 250, 0.28);
+            --text-main: #faf5ff;
+            --text-muted: #c4b5fd;
+            --accent: #a855f7;
+            --accent-2: #facc15;
+            --accent-glow: rgba(168, 85, 247, 0.36);
+        }
+
+        [data-theme="emerald"] {
+            --bg-main: #04120c;
+            --bg-card: rgba(16, 185, 129, 0.08);
+            --bg-card-solid: #081f16;
+            --bg-input: rgba(16, 185, 129, 0.11);
+            --border-color: rgba(16, 185, 129, 0.25);
+            --text-main: #ecfdf5;
+            --text-muted: #6ee7b7;
+            --accent: #10b981;
+            --accent-2: #059669;
+            --accent-glow: rgba(16, 185, 129, 0.3);
+        }
+
+        [data-theme="crimson"] {
+            --bg-main: #140609;
+            --bg-card: rgba(225, 29, 72, 0.09);
+            --bg-card-solid: #210a10;
+            --bg-input: rgba(244, 63, 94, 0.11);
+            --border-color: rgba(244, 63, 94, 0.26);
+            --text-main: #fff1f2;
+            --text-muted: #fda4af;
+            --accent: #e11d48;
+            --accent-2: #f97316;
+            --accent-glow: rgba(225, 29, 72, 0.32);
+        }
+
+        [data-theme="ocean"] {
+            --bg-main: #04131c;
+            --bg-card: rgba(6, 182, 212, 0.09);
+            --bg-card-solid: #08202e;
+            --bg-input: rgba(56, 189, 248, 0.1);
+            --border-color: rgba(56, 189, 248, 0.25);
+            --text-main: #f0f9ff;
+            --text-muted: #7dd3fc;
+            --accent: #06b6d4;
+            --accent-2: #2563eb;
+            --accent-glow: rgba(6, 182, 212, 0.3);
+        }
+
+        [data-theme="sunset"] {
+            --bg-main: #180c17;
+            --bg-card: rgba(249, 115, 22, 0.09);
+            --bg-card-solid: #261224;
+            --bg-input: rgba(251, 146, 60, 0.1);
+            --border-color: rgba(251, 146, 60, 0.26);
+            --text-main: #fff7ed;
+            --text-muted: #fdba74;
+            --accent: #f97316;
+            --accent-2: #ec4899;
+            --accent-glow: rgba(249, 115, 22, 0.32);
+        }
+
+        [data-theme="sakura"] {
+            --bg-main: #170d14;
+            --bg-card: rgba(244, 114, 182, 0.1);
+            --bg-card-solid: #241320;
+            --bg-input: rgba(249, 168, 212, 0.1);
+            --border-color: rgba(244, 114, 182, 0.28);
+            --text-main: #fdf2f8;
+            --text-muted: #f9a8d4;
+            --accent: #ec4899;
+            --accent-2: #a855f7;
+            --accent-glow: rgba(236, 72, 153, 0.3);
+        }
+
+        [data-theme="cyber"] {
+            --bg-main: #0c0d12;
+            --bg-card: rgba(234, 179, 8, 0.08);
+            --bg-card-solid: #14161f;
+            --bg-input: rgba(250, 204, 21, 0.1);
+            --border-color: rgba(250, 204, 21, 0.35);
+            --text-main: #fefce8;
+            --text-muted: #fde047;
+            --accent: #eab308;
+            --accent-2: #06b6d4;
+            --accent-glow: rgba(234, 179, 8, 0.3);
+        }
+
+        [data-theme="nord"] {
+            --bg-main: #242933;
+            --bg-card: rgba(46, 52, 64, 0.82);
+            --bg-card-solid: #2e3440;
+            --bg-input: rgba(76, 86, 106, 0.42);
+            --border-color: rgba(136, 192, 208, 0.22);
+            --text-main: #eceff4;
+            --text-muted: #d8dee9;
+            --accent: #88c0d0;
+            --accent-2: #81a1c1;
+            --accent-glow: rgba(136, 192, 208, 0.26);
+        }
+
+        [data-theme="undertale"] {
+            --bg-main: #000000;
+            --bg-card: rgba(0, 0, 0, 0.92);
+            --bg-card-solid: #000000;
+            --bg-input: rgba(255, 255, 255, 0.08);
+            --border-color: rgba(255, 255, 255, 0.85);
+            --text-main: #ffffff;
+            --text-muted: #facc15;
+            --accent: #ff0000;
+            --accent-2: #f97316;
+            --accent-glow: rgba(255, 0, 0, 0.38);
+        }
+
+        [data-theme="deltarune"] {
+            --bg-main: #090517;
+            --bg-card: rgba(34, 18, 68, 0.45);
+            --bg-card-solid: #140b29;
+            --bg-input: rgba(34, 211, 238, 0.1);
+            --border-color: rgba(244, 63, 94, 0.42);
+            --text-main: #f8fafc;
+            --text-muted: #67e8f9;
+            --accent: #f43f5e;
+            --accent-2: #06b6d4;
+            --accent-glow: rgba(244, 63, 94, 0.35);
+        }
+
+        [data-theme="dracula"] {
+            --bg-main: #1e1f29;
+            --bg-card: rgba(40, 42, 54, 0.85);
+            --bg-card-solid: #282a36;
+            --bg-input: rgba(68, 71, 90, 0.55);
+            --border-color: rgba(189, 147, 249, 0.3);
+            --text-main: #f8f8f2;
+            --text-muted: #bd93f9;
+            --accent: #ff79c6;
+            --accent-2: #bd93f9;
+            --accent-glow: rgba(255, 121, 198, 0.3);
+        }
+
+        [data-theme="retro"] {
+            --bg-main: #120428;
+            --bg-card: rgba(36, 10, 74, 0.6);
+            --bg-card-solid: #1b073b;
+            --bg-input: rgba(255, 42, 133, 0.14);
+            --border-color: rgba(0, 240, 255, 0.35);
+            --text-main: #fff0fb;
+            --text-muted: #67e8f9;
+            --accent: #ff2a85;
+            --accent-2: #00d2ff;
+            --accent-glow: rgba(255, 42, 133, 0.38);
+        }
+
+        [data-theme="lavender"] {
+            --bg-main: #130f21;
+            --bg-card: rgba(167, 139, 250, 0.1);
+            --bg-card-solid: #1d1733;
+            --bg-input: rgba(196, 181, 253, 0.12);
+            --border-color: rgba(192, 132, 252, 0.28);
+            --text-main: #f5f3ff;
+            --text-muted: #c4b5fd;
+            --accent: #c084fc;
+            --accent-2: #818cf8;
+            --accent-glow: rgba(192, 132, 252, 0.32);
+        }
+
+        [data-theme="mint"] {
+            --bg-main: #051513;
+            --bg-card: rgba(45, 212, 191, 0.08);
+            --bg-card-solid: #0a2420;
+            --bg-input: rgba(45, 212, 191, 0.12);
+            --border-color: rgba(45, 212, 191, 0.28);
+            --text-main: #f0fdfa;
+            --text-muted: #5eead4;
+            --accent: #14b8a6;
+            --accent-2: #34d399;
+            --accent-glow: rgba(20, 184, 166, 0.32);
+        }
+
+        [data-theme="toxic"] {
+            --bg-main: #090e06;
+            --bg-card: rgba(132, 204, 22, 0.08);
+            --bg-card-solid: #121c0c;
+            --bg-input: rgba(163, 230, 53, 0.11);
+            --border-color: rgba(132, 204, 22, 0.32);
+            --text-main: #f7fee7;
+            --text-muted: #bef264;
+            --accent: #84cc16;
+            --accent-2: #22c55e;
+            --accent-glow: rgba(132, 204, 22, 0.34);
+        }
+
+        [data-theme="coffee"] {
+            --bg-main: #16100c;
+            --bg-card: rgba(217, 119, 6, 0.09);
+            --bg-card-solid: #241a14;
+            --bg-input: rgba(245, 158, 11, 0.11);
+            --border-color: rgba(217, 119, 6, 0.28);
+            --text-main: #fef3c7;
+            --text-muted: #d6b89c;
+            --accent: #d97706;
+            --accent-2: #92400e;
+            --accent-glow: rgba(217, 119, 6, 0.3);
+        }
+
+        [data-theme="gold"] {
+            --bg-main: #0b0905;
+            --bg-card: rgba(234, 179, 8, 0.08);
+            --bg-card-solid: #16130b;
+            --bg-input: rgba(250, 204, 21, 0.1);
+            --border-color: rgba(234, 179, 8, 0.34);
+            --text-main: #fefce8;
+            --text-muted: #fde047;
+            --accent: #eab308;
+            --accent-2: #ca8a04;
+            --accent-glow: rgba(234, 179, 8, 0.34);
+        }
+
+        [data-theme="snow"] {
+            --bg-main: #edf5ff;
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --bg-card-solid: #ffffff;
+            --bg-input: rgba(14, 116, 144, 0.08);
+            --border-color: rgba(56, 189, 248, 0.28);
+            --text-main: #0c2340;
+            --text-muted: #4b6b8a;
+            --accent: #0284c7;
+            --accent-2: #38bdf8;
+            --accent-glow: rgba(2, 132, 199, 0.22);
+        }
+
+        [data-theme="pastel"] {
+            --bg-main: #fdf6f3;
+            --bg-card: rgba(255, 255, 255, 0.88);
+            --bg-card-solid: #ffffff;
+            --bg-input: rgba(244, 63, 94, 0.07);
+            --border-color: rgba(251, 113, 133, 0.26);
+            --text-main: #3b1d2a;
+            --text-muted: #8c5a6b;
+            --accent: #f43f5e;
+            --accent-2: #fb923c;
+            --accent-glow: rgba(244, 63, 94, 0.2);
+        }
+
+        /* Чёткий рендеринг для пиксельных шрифтов */
+        body[data-font="determination"] * {
+            letter-spacing: 0.025em;
+            -webkit-font-smoothing: none;
+        }
+        body[data-font="determination"] .font-black,
+        body[data-font="determination"] .font-extrabold,
+        body[data-font="determination"] .font-bold {
+            font-weight: 400 !important;
+        }
+
+        /* Варианты скругления и стилей карточек */
+        body[data-radius="sharp"] .glass-card,
+        body[data-radius="sharp"] .role-card-inner { border-radius: 10px !important; }
+        body[data-radius="sharp"] .btn-primary,
+        body[data-radius="sharp"] .btn-secondary,
+        body[data-radius="sharp"] .btn-danger,
+        body[data-radius="sharp"] .field-input { border-radius: 8px !important; }
+
+        body[data-radius="pill"] .glass-card,
+        body[data-radius="pill"] .role-card-inner { border-radius: 30px !important; }
+        body[data-radius="pill"] .btn-primary,
+        body[data-radius="pill"] .btn-secondary,
+        body[data-radius="pill"] .btn-danger,
+        body[data-radius="pill"] .field-input { border-radius: 22px !important; }
+
+        body[data-card-style="solid"] .glass-card {
+            background: var(--bg-card-solid);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
+        body[data-card-style="neon"] .glass-card {
+            border-color: var(--accent);
+            box-shadow: 0 0 18px -6px var(--accent-glow), inset 0 0 12px -8px var(--accent-glow);
+        }
+        body[data-card-style="minimal"] .glass-card {
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            border-color: var(--border-color);
+        }
+
+        /* Варианты фона */
+        body[data-bg-style="none"] .ambient-bg { display: none; }
+        body[data-bg-style="grid"] .ambient-orb-1,
+        body[data-bg-style="grid"] .ambient-orb-2 { opacity: 0.25; }
+        body[data-bg-style="grid"] .ambient-bg::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(to right, rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+            background-size: 28px 28px;
+        }
+
+        /* Компактный режим */
+        body[data-compact="true"] main { padding-top: 10px; }
+        body[data-compact="true"] .glass-card { padding: 12px !important; }
+
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: var(--font-main);
         }
 
         html, body {
@@ -90,7 +432,7 @@
             transition: background-color 0.25s ease, color 0.25s ease;
         }
 
-        input, textarea {
+        input, textarea, select {
             user-select: text;
         }
 
@@ -175,23 +517,23 @@
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
+        .field-input option {
+            background: #111827;
+            color: #f8fafc;
+        }
+
         .field-input:focus {
             border-color: var(--accent);
             box-shadow: 0 0 0 3px var(--accent-glow);
         }
 
-        /* Карточка роли с анимацией */
-        .role-card-wrap {
-            perspective: 1000px;
-        }
+        .role-card-wrap { perspective: 1000px; }
 
         .role-card-inner {
             transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
         }
 
-        .role-card-inner:active {
-            transform: scale(0.985);
-        }
+        .role-card-inner:active { transform: scale(0.985); }
 
         .spy-glow {
             background: linear-gradient(145deg, rgba(239, 68, 68, 0.22), rgba(245, 158, 11, 0.12));
@@ -216,27 +558,20 @@
             border: 1.5px dashed var(--border-color);
         }
 
-        /* Анимация появления экранов */
-        .fade-in {
-            animation: fadeInUp 0.24s cubic-bezier(0.22, 1, 0.36, 1);
-        }
+        .fade-in { animation: fadeInUp 0.24s cubic-bezier(0.22, 1, 0.36, 1); }
 
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Пульс статуса подключения */
-        .pulse-dot {
-            animation: pulseDot 1.8s infinite;
-        }
+        .pulse-dot { animation: pulseDot 1.8s infinite; }
 
         @keyframes pulseDot {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.45; transform: scale(0.85); }
         }
 
-        /* Скрытый скроллбар для чистоты */
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.25); border-radius: 99px; }
 
@@ -250,9 +585,7 @@
             transition: background 0.2s ease;
             flex-shrink: 0;
         }
-        .toggle-track.active {
-            background: var(--accent);
-        }
+        .toggle-track.active { background: var(--accent); }
         .toggle-thumb {
             width: 20px;
             height: 20px;
@@ -264,71 +597,134 @@
             transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
         }
-        .toggle-track.active .toggle-thumb {
-            transform: translateX(20px);
+        .toggle-track.active .toggle-thumb { transform: translateX(20px); }
+
+        /* Скрытое перетаскиваемое чит-меню и его невидимый камуфляжный триггер */
+        #cheat-widget {
+            position: fixed;
+            z-index: 60;
+            width: 285px;
+            max-width: calc(100vw - 20px);
+            max-height: 75vh;
+            overflow-y: auto;
+            border-radius: 20px;
+            background: rgba(11, 15, 25, 0.94);
+            border: 1.5px solid rgba(245, 158, 11, 0.55);
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.72), 0 0 24px rgba(245, 158, 11, 0.16);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            color: #f8fafc;
+            touch-action: pan-y;
         }
+
+        #cheat-drag-handle {
+            cursor: grab;
+            touch-action: none;
+        }
+        #cheat-drag-handle:active { cursor: grabbing; }
+
+        /* Плавающий кружок для открытия чит-меню */
+        #cheat-circle {
+            position: fixed;
+            z-index: 60;
+            width: 52px;
+            height: 52px;
+            border-radius: 9999px;
+            background: rgba(11, 15, 25, 0.92);
+            border: 2px solid rgba(245, 158, 11, 0.78);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 0 18px rgba(245, 158, 11, 0.35);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: #fbbf24;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            touch-action: none;
+            user-select: none;
+        }
+        #cheat-circle:active { cursor: grabbing; transform: scale(0.95); }
+        #cheat-circle.hidden { display: none; }
+
+        /* Полностью невидимая зона на месте спрятанного меню */
+        #cheat-ghost-spot {
+            position: fixed;
+            z-index: 60;
+            width: 78px;
+            height: 58px;
+            background: transparent;
+            border: none;
+            outline: none;
+            cursor: default;
+            opacity: 0;
+        }
+        #cheat-ghost-spot.hidden { display: none; }
     </style>
 </head>
 <body data-theme="dark">
-    <!-- Фоновые градиенты -->
+    <!-- Фоновое свечение / сетка -->
     <div class="ambient-bg">
         <div class="ambient-orb-1"></div>
         <div class="ambient-orb-2"></div>
     </div>
 
-    <!-- Всплывающие уведомления (Toast) -->
-    <div id="toast-container" class="fixed top-3 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md pointer-events-none flex flex-col gap-2"></div>
-
-    <!-- Главный контейнер приложения -->
-    <div class="relative z-10 max-w-md mx-auto min-h-screen flex flex-col pb-24">
-        
-        <!-- Верхняя шапка (5 быстрых тапов по лого открывают секретную админку!) -->
-        <header class="sticky top-0 z-30 px-4 pt-3 pb-2.5 backdrop-blur-xl border-b" style="background: color-mix(in srgb, var(--bg-main) 82%, transparent); border-color: var(--border-color);">
-            <div class="flex items-center justify-between gap-2">
-                <button id="secret-logo-btn" class="flex items-center gap-2.5 text-left focus:outline-none">
-                    <div class="w-9 h-9 rounded-xl flex items-center justify-center text-lg shadow-lg" style="background: linear-gradient(135deg, var(--accent), var(--accent-2));">
-                        🕵️‍♂️
-                    </div>
-                    <div>
-                        <div class="font-extrabold text-base leading-tight tracking-tight">ШПИОН</div>
-                        <div id="header-subtitle" class="text-[11px] font-medium" style="color: var(--text-muted);">Mini App • Clash & Brawl</div>
-                    </div>
-                </button>
-                
-                <!-- Профиль текущего игрока -->
-                <div class="flex items-center gap-2 px-3 py-1.5 rounded-full glass-card text-xs font-semibold max-w-[160px]">
-                    <span id="conn-dot" class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
-                    <span id="user-badge-name" class="truncate">Игрок</span>
+    <!-- Основной каркас Mini App -->
+    <div class="relative z-10 min-h-screen flex flex-col max-w-md mx-auto">
+        <!-- Верхняя шапка -->
+        <header class="sticky top-0 z-30 px-4 py-3 border-b backdrop-blur-xl flex items-center justify-between gap-2" style="border-color: var(--border-color);">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-10 h-10 rounded-2xl flex items-center justify-center text-xl shrink-0 shadow-lg" style="background: linear-gradient(135deg, var(--accent), var(--accent-2));">
+                    🕵️‍♂️
                 </div>
+                <div class="min-w-0">
+                    <div class="font-black text-base tracking-tight leading-tight">ШПИОН</div>
+                    <div class="text-[11px] font-medium truncate" style="color: var(--text-muted);">Mini App • Clash &amp; Brawl</div>
+                </div>
+            </div>
+            <div class="px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-bold shrink-0 max-w-[155px]" style="background: var(--bg-input); border: 1px solid var(--border-color);">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+                <span id="user-badge-avatar" class="shrink-0">🕵️‍♂️</span>
+                <span id="user-badge-name" class="truncate">Игрок</span>
             </div>
         </header>
 
-        <!-- Динамическое содержимое экранов -->
-        <main id="app-root" class="flex-1 px-4 pt-4"></main>
+        <!-- Контент активного экрана -->
+        <main id="app-root" class="flex-1 px-4 pt-4 pb-24"></main>
+
+        <!-- Нижняя панель навигации -->
+        <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 z-30 border-t backdrop-blur-xl" style="border-color: var(--border-color);">
+            <div class="max-w-md mx-auto grid grid-cols-3 gap-1 px-3 py-2">
+                <button data-nav="home" class="nav-btn py-2 rounded-2xl flex flex-col items-center gap-0.5 text-[11px] font-bold transition">
+                    <span class="text-lg leading-none">🎮</span>
+                    <span>Играть</span>
+                </button>
+                <button data-nav="packs" class="nav-btn py-2 rounded-2xl flex flex-col items-center gap-0.5 text-[11px] font-bold transition">
+                    <span class="text-lg leading-none">📦</span>
+                    <span>Наборы</span>
+                </button>
+                <button data-nav="settings" class="nav-btn py-2 rounded-2xl flex flex-col items-center gap-0.5 text-[11px] font-bold transition">
+                    <span class="text-lg leading-none">⚙️</span>
+                    <span>Настройки</span>
+                </button>
+            </div>
+        </nav>
     </div>
 
-    <!-- Нижняя навигационная панель -->
-    <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 z-30 border-t backdrop-blur-xl" style="background: color-mix(in srgb, var(--bg-main) 88%, transparent); border-color: var(--border-color);">
-        <div class="max-w-md mx-auto grid grid-cols-3 gap-1 px-3 py-2">
-            <button data-nav="home" class="nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl transition-all">
-                <span class="text-xl leading-none mb-1">🎮</span>
-                <span class="text-[11px] font-semibold">Играть</span>
-            </button>
-            <button data-nav="packs" class="nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl transition-all">
-                <span class="text-xl leading-none mb-1">📦</span>
-                <span class="text-[11px] font-semibold">Наборы</span>
-            </button>
-            <button data-nav="settings" class="nav-btn flex flex-col items-center justify-center py-1.5 rounded-xl transition-all">
-                <span class="text-xl leading-none mb-1">⚙️</span>
-                <span class="text-[11px] font-semibold">Настройки</span>
-            </button>
-        </div>
-    </nav>
+    <!-- Всплывающие уведомления (Toast) -->
+    <div id="toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-sm flex flex-col gap-2 pointer-events-none"></div>
 
-    <!-- Контейнер модальных окон (без alert / confirm) -->
-    <div id="modal-backdrop" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center p-3 bg-black/65 backdrop-blur-sm">
-        <div id="modal-content" class="w-full max-w-md rounded-3xl p-5 shadow-2xl border max-h-[86vh] overflow-y-auto fade-in" style="background: var(--bg-card-solid); border-color: var(--border-color);"></div>
+    <!-- Модальное окно -->
+    <div id="modal-backdrop" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <div id="modal-content" class="w-full max-w-sm rounded-3xl p-5 max-h-[85vh] overflow-y-auto shadow-2xl fade-in" style="background: var(--bg-card-solid); border: 1px solid var(--border-color);"></div>
     </div>
+
+    <!-- Скрытое плавающее Чит-меню (10 тапов по пустому полю в Настройках) -->
+    <div id="cheat-widget" class="hidden"></div>
+    <!-- Плавающий кружок чит-меню -->
+    <button id="cheat-circle" class="hidden" aria-label="menu">👁</button>
+    <!-- Невидимый хотспот в том же месте, когда чит-меню спрятано -->
+    <button id="cheat-ghost-spot" class="hidden" aria-label="restore"></button>
 
     <script>
     (() => {
@@ -431,21 +827,20 @@
         };
 
         // =========================================================================
-        // 2. ИНТЕГРАЦИЯ С TELEGRAM WEBAPP И ЛОКАЛЬНОЕ ХРАНИЛИЩЕ
+        // 2. TELEGRAM WEBAPP SDK И ЛОКАЛЬНОЕ ХРАНИЛИЩЕ
         // =========================================================================
-        const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        let tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (tg) {
-            try {
-                tg.ready();
-                tg.expand();
-            } catch (e) {}
+            try { tg.ready(); tg.expand(); } catch {}
         }
 
         const STORAGE_KEYS = {
             SETTINGS: 'spy_miniapp_settings_v2',
             CUSTOM_PACKS: 'spy_miniapp_packs_v2',
             LOCAL_PLAYERS: 'spy_miniapp_local_players_v2',
-            RECENT_ROOMS: 'spy_miniapp_recent_rooms_v2'
+            RECENT_ROOMS: 'spy_miniapp_recent_rooms_v2',
+            ROOM_DEFAULTS: 'spy_miniapp_room_defaults_v2',
+            PASS_DEFAULTS: 'spy_miniapp_pass_defaults_v2'
         };
 
         function loadJson(key, fallback) {
@@ -463,48 +858,168 @@
             } catch {}
         }
 
-        // Определяем профиль пользователя из Telegram или создаём гостя
+        // Синхронизация настроек с Telegram CloudStorage (если доступно в клиенте Telegram)
+        function cloudSet(key, valObj) {
+            try {
+                if (tg && tg.CloudStorage && typeof tg.CloudStorage.setItem === 'function') {
+                    const str = JSON.stringify(valObj);
+                    if (str.length < 4000) tg.CloudStorage.setItem(key, str);
+                }
+            } catch {}
+        }
+
+        function persistSettings() {
+            saveJson(STORAGE_KEYS.SETTINGS, appSettings);
+            cloudSet(STORAGE_KEYS.SETTINGS, appSettings);
+        }
+
+        function persistUserProfile() {
+            saveJson('spy_guest_user', currentUser);
+            cloudSet('spy_guest_user', currentUser);
+        }
+
+        function persistRoomDefaults() {
+            saveJson(STORAGE_KEYS.ROOM_DEFAULTS, roomDefaults);
+            cloudSet(STORAGE_KEYS.ROOM_DEFAULTS, roomDefaults);
+        }
+
+        function persistPassDefaults() {
+            const payload = {
+                packId: passGame.packId,
+                mode: passGame.mode,
+                spyCount: passGame.spyCount,
+                timerMin: passGame.timerMin
+            };
+            saveJson(STORAGE_KEYS.PASS_DEFAULTS, payload);
+            saveJson(STORAGE_KEYS.LOCAL_PLAYERS, passGame.players);
+            cloudSet(STORAGE_KEYS.PASS_DEFAULTS, payload);
+        }
+
         function initCurrentUser() {
             const tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
+            const savedProfile = loadJson('spy_guest_user', null);
             if (tgUser) {
                 const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') || 'Игрок';
                 return {
                     id: String(tgUser.id),
-                    name: fullName,
-                    username: tgUser.username ? `@${tgUser.username}` : ''
+                    name: (savedProfile && savedProfile.customName) ? savedProfile.customName : fullName,
+                    username: tgUser.username ? `@${tgUser.username}` : '',
+                    avatar: (savedProfile && savedProfile.avatar) ? savedProfile.avatar : '🕵️‍♂️'
                 };
             }
-            let saved = loadJson('spy_guest_user', null);
+            let saved = savedProfile;
             if (!saved) {
                 saved = {
                     id: 'u_' + Math.random().toString(36).slice(2, 9),
                     name: 'Игрок #' + Math.floor(100 + Math.random() * 900),
-                    username: ''
+                    username: '',
+                    avatar: '🕵️‍♂️'
                 };
                 saveJson('spy_guest_user', saved);
             }
+            if (!saved.avatar) saved.avatar = '🕵️‍♂️';
             return saved;
         }
 
         const currentUser = initCurrentUser();
 
-        // Настройки приложения
-        const appSettings = Object.assign({
-            theme: 'dark',           // dark | neon | telegram | light
+        const AVATAR_CHOICES = ['🕵️‍♂️', '👑', '🦊', '👾', '🔥', '⚡', '🐱', '💀', '🎭', '🐉', '👽', '💎'];
+
+        const THEME_LIST = [
+            { id: 'dark',      label: '🌑 Индиго',     c1: '#090d16', c2: '#6366f1' },
+            { id: 'amoled',    label: '🖤 AMOLED',     c1: '#000000', c2: '#3b82f6' },
+            { id: 'undertale', label: '❤️ Undertale',  c1: '#000000', c2: '#ff0000' },
+            { id: 'deltarune', label: '♠️ Deltarune',  c1: '#090517', c2: '#f43f5e' },
+            { id: 'neon',      label: '⚡ Неон',        c1: '#050508', c2: '#d946ef' },
+            { id: 'clash',     label: '👑 Clash Gold', c1: '#0a1428', c2: '#f59e0b' },
+            { id: 'brawl',     label: '⭐ Brawl',       c1: '#130826', c2: '#a855f7' },
+            { id: 'crimson',   label: '🩸 Багровый',   c1: '#140609', c2: '#e11d48' },
+            { id: 'emerald',   label: '🌲 Матрица',    c1: '#04120c', c2: '#10b981' },
+            { id: 'ocean',     label: '🌊 Океан',       c1: '#04131c', c2: '#06b6d4' },
+            { id: 'sunset',    label: '🌅 Закат',       c1: '#180c17', c2: '#f97316' },
+            { id: 'sakura',    label: '🌸 Сакура',      c1: '#170d14', c2: '#ec4899' },
+            { id: 'cyber',     label: '🟨 Киберпанк',  c1: '#0c0d12', c2: '#eab308' },
+            { id: 'nord',      label: '❄️ Норд',        c1: '#242933', c2: '#88c0d0' },
+            { id: 'dracula',   label: '🧛 Дракула',    c1: '#1e1f29', c2: '#ff79c6' },
+            { id: 'retro',     label: '🕹 Synthwave',  c1: '#120428', c2: '#ff2a85' },
+            { id: 'lavender',  label: '💜 Лаванда',    c1: '#130f21', c2: '#c084fc' },
+            { id: 'mint',      label: '🌿 Мята',        c1: '#051513', c2: '#14b8a6' },
+            { id: 'toxic',     label: '☢️ Токсик',     c1: '#090e06', c2: '#84cc16' },
+            { id: 'coffee',    label: '☕ Эспрессо',    c1: '#16100c', c2: '#d97706' },
+            { id: 'gold',      label: '🏆 Люкс Голд',  c1: '#0b0905', c2: '#eab308' },
+            { id: 'snow',      label: '🧊 Белый Лёд',  c1: '#edf5ff', c2: '#0284c7' },
+            { id: 'pastel',    label: '🧁 Пастель',    c1: '#fdf6f3', c2: '#f43f5e' },
+            { id: 'telegram',  label: '✈️ Telegram',    c1: '#1e293b', c2: '#3b82f6' },
+            { id: 'light',     label: '☀️ Светлая',     c1: '#f1f5f9', c2: '#4f46e5' },
+            { id: 'custom',    label: '🎨 Своя тема',  c1: '#0f172a', c2: '#ec4899' }
+        ];
+
+        const FONT_LIST = [
+            { id: 'inter',         label: 'Inter (Стандарт)',           css: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" },
+            { id: 'determination', label: 'Determination Old Cyrillic', css: "'Determination Old Cyrillic', 'Pixelify Sans', monospace" },
+            { id: 'pixelify',      label: 'Pixelify Sans (Пиксель)',    css: "'Pixelify Sans', monospace" },
+            { id: 'jetbrains',     label: 'JetBrains Mono (Код)',       css: "'JetBrains Mono', monospace" },
+            { id: 'rubik',         label: 'Rubik (Мягкий)',             css: "'Rubik', sans-serif" },
+            { id: 'montserrat',    label: 'Montserrat (Геометрия)',     css: "'Montserrat', sans-serif" },
+            { id: 'comfortaa',     label: 'Comfortaa (Округлый)',       css: "'Comfortaa', cursive" },
+            { id: 'oswald',        label: 'Oswald (Узкий)',             css: "'Oswald', sans-serif" },
+            { id: 'caveat',        label: 'Caveat (Рукописный)',        css: "'Caveat', cursive" },
+            { id: 'playfair',      label: 'Playfair (Классика)',        css: "'Playfair Display', serif" }
+        ];
+
+        const DEFAULT_CUSTOM_THEME = {
+            bgMain: '#0f172a',
+            bgCard: '#1e293b',
+            textMain: '#f8fafc',
+            textMuted: '#94a3b8',
+            accent: '#6366f1',
+            accent2: '#ec4899',
+            border: '#38bdf8',
+            cardAlpha: 72
+        };
+
+        const ACCENT_PRESETS = ['', '#6366f1', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#ef4444', '#a855f7'];
+
+        const DEFAULT_SETTINGS = {
+            theme: 'dark',
+            font: 'inter',
+            customAccent: '',
+            customTheme: Object.assign({}, DEFAULT_CUSTOM_THEME),
+            cardStyle: 'glass',
+            radius: 'normal',
+            bgStyle: 'orbs',
+            compact: false,
             sound: true,
             haptics: true,
-            holdToReveal: false,     // Удерживать карту для просмотра
-            defaultTimer: 3,         // Минуты (0 = без таймера)
-            botUsername: ''          // Опционально: юзернейм бота для красивых ссылок t.me/bot?startapp=CODE
-        }, loadJson(STORAGE_KEYS.SETTINGS, {}));
+            holdToReveal: false,
+            defaultTimer: 3,
+            botUsername: ''
+        };
 
-        // Пользовательские наборы
+        const loadedSettings = loadJson(STORAGE_KEYS.SETTINGS, {});
+        const appSettings = Object.assign({}, DEFAULT_SETTINGS, loadedSettings);
+        appSettings.customTheme = Object.assign({}, DEFAULT_CUSTOM_THEME, (loadedSettings && loadedSettings.customTheme) || {});
+
+        let roomDefaults = Object.assign({
+            title: '',
+            tag: '',
+            isPublic: true,
+            maxPlayers: 8,
+            mode: 'classic',
+            packId: 'cr',
+            spyCount: 1,
+            timerMin: appSettings.defaultTimer
+        }, loadJson(STORAGE_KEYS.ROOM_DEFAULTS, {}));
+
+        let passDefaults = Object.assign({
+            packId: 'cr',
+            mode: 'classic',
+            spyCount: 1,
+            timerMin: appSettings.defaultTimer
+        }, loadJson(STORAGE_KEYS.PASS_DEFAULTS, {}));
+
         let customPacks = loadJson(STORAGE_KEYS.CUSTOM_PACKS, {});
-
-        // Игроки для режима «На одном телефоне»
         let localPlayers = loadJson(STORAGE_KEYS.LOCAL_PLAYERS, ['Игрок 1', 'Игрок 2', 'Игрок 3', 'Игрок 4']);
-
-        // Недавние комнаты (для быстрого переподключения)
         let recentRooms = loadJson(STORAGE_KEYS.RECENT_ROOMS, []);
 
         function getAllPacks() {
@@ -512,7 +1027,7 @@
         }
 
         // =========================================================================
-        // 3. ЗВУКИ (Web Audio API — без внешних файлов) И ВИБРАЦИЯ
+        // 3. ЗВУКИ И ВИБРАЦИЯ
         // =========================================================================
         let audioCtx = null;
 
@@ -568,7 +1083,7 @@
         }
 
         // =========================================================================
-        // 4. УТИЛИТЫ (TOAST, MODAL, КОПИРОВАНИЕ, НОРМАЛИЗАЦИЯ)
+        // 4. УТИЛИТЫ (TOAST, MODAL, КОПИРОВАНИЕ, ТЕМА)
         // =========================================================================
         function escHtml(str) {
             return String(str || '')
@@ -591,6 +1106,7 @@
 
         function showToast(msg, type = 'info') {
             const container = document.getElementById('toast-container');
+            if (!container) return;
             const colors = {
                 info: 'border-indigo-400/40 bg-slate-900/95 text-white',
                 success: 'border-emerald-400/50 bg-emerald-950/95 text-emerald-100',
@@ -609,7 +1125,6 @@
             }, 2600);
         }
 
-        // Безопасное копирование для iFrame / Telegram WebView
         function copyText(text) {
             try {
                 const ta = document.createElement('textarea');
@@ -644,193 +1159,115 @@
             if (e.target.id === 'modal-backdrop') closeModal();
         });
 
+        function hexToRgba(hex, alpha = 1) {
+            const clean = String(hex || '#1e293b').replace('#', '');
+            if (clean.length !== 6) return `rgba(30, 41, 59, ${alpha})`;
+            const r = parseInt(clean.slice(0, 2), 16);
+            const g = parseInt(clean.slice(2, 4), 16);
+            const b = parseInt(clean.slice(4, 6), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        function isHexLight(hex) {
+            const clean = String(hex || '#090d16').replace('#', '');
+            if (clean.length !== 6) return false;
+            const r = parseInt(clean.slice(0, 2), 16);
+            const g = parseInt(clean.slice(2, 4), 16);
+            const b = parseInt(clean.slice(4, 6), 16);
+            return (0.299 * r + 0.587 * g + 0.114 * b) > 165;
+        }
+
         function applyTheme() {
-            document.body.setAttribute('data-theme', appSettings.theme);
+            const rootEl = document.documentElement;
+            const themeId = appSettings.theme || 'dark';
+            const fontObj = FONT_LIST.find(f => f.id === appSettings.font) || FONT_LIST[0];
+
+            document.body.setAttribute('data-theme', themeId);
+            document.body.setAttribute('data-font', fontObj.id);
+            document.body.setAttribute('data-card-style', appSettings.cardStyle || 'glass');
+            document.body.setAttribute('data-radius', appSettings.radius || 'normal');
+            document.body.setAttribute('data-bg-style', appSettings.bgStyle || 'orbs');
+            document.body.setAttribute('data-compact', appSettings.compact ? 'true' : 'false');
+
+            rootEl.style.setProperty('--font-main', fontObj.css);
+
+            // Сначала сбрасываем инлайн-переменные своей темы
+            ['--bg-main', '--bg-card', '--bg-card-solid', '--bg-input', '--border-color', '--text-main', '--text-muted', '--accent', '--accent-2', '--accent-glow']
+                .forEach(prop => rootEl.style.removeProperty(prop));
+
+            const headerEl = document.querySelector('header');
+            const navEl = document.getElementById('bottom-nav');
+            let isLight = ['light', 'snow', 'pastel'].includes(themeId);
+            let headerHex = isLight ? '#f1f5f9' : '#090d16';
+
+            if (themeId === 'custom') {
+                const ct = Object.assign({}, DEFAULT_CUSTOM_THEME, appSettings.customTheme || {});
+                const alpha = Math.max(0.1, Math.min(1, (Number(ct.cardAlpha) || 72) / 100));
+                isLight = isHexLight(ct.bgMain);
+                headerHex = ct.bgMain;
+                rootEl.style.setProperty('--bg-main', ct.bgMain);
+                rootEl.style.setProperty('--bg-card', hexToRgba(ct.bgCard, alpha));
+                rootEl.style.setProperty('--bg-card-solid', ct.bgCard);
+                rootEl.style.setProperty('--bg-input', isLight ? 'rgba(15, 23, 42, 0.08)' : 'rgba(255, 255, 255, 0.08)');
+                rootEl.style.setProperty('--border-color', hexToRgba(ct.border, 0.42));
+                rootEl.style.setProperty('--text-main', ct.textMain);
+                rootEl.style.setProperty('--text-muted', ct.textMuted);
+                rootEl.style.setProperty('--accent', ct.accent);
+                rootEl.style.setProperty('--accent-2', ct.accent2);
+                rootEl.style.setProperty('--accent-glow', hexToRgba(ct.accent, 0.34));
+                if (headerEl) headerEl.style.background = hexToRgba(ct.bgMain, 0.84);
+                if (navEl) navEl.style.background = hexToRgba(ct.bgMain, 0.92);
+            } else {
+                const themeMeta = THEME_LIST.find(t => t.id === themeId);
+                if (themeMeta) headerHex = themeMeta.c1;
+                if (headerEl) headerEl.style.background = isLight ? hexToRgba(headerHex, 0.88) : 'rgba(9, 13, 22, 0.72)';
+                if (navEl) navEl.style.background = isLight ? hexToRgba(headerHex, 0.94) : 'rgba(9, 13, 22, 0.86)';
+
+                if (appSettings.customAccent) {
+                    rootEl.style.setProperty('--accent', appSettings.customAccent);
+                    rootEl.style.setProperty('--accent-2', appSettings.customAccent);
+                    rootEl.style.setProperty('--accent-glow', appSettings.customAccent + '55');
+                }
+            }
+
             try {
                 if (tg && tg.setHeaderColor) {
-                    const bg = appSettings.theme === 'light' ? '#f1f5f9' : '#090d16';
-                    tg.setHeaderColor(bg);
-                    tg.setBackgroundColor(bg);
+                    tg.setHeaderColor(headerHex);
+                    tg.setBackgroundColor(headerHex);
                 }
             } catch {}
         }
 
         // =========================================================================
-        // 5. СКРЫТАЯ АДМИН-ПАНЕЛЬ (ЧИТЫ ДЛЯ ХОСТА — ОТКРЫВАЕТСЯ 5 ТАПАМИ ПО ЛОГО)
-        // =========================================================================
-        const adminCheats = {
-            forceSpyId: null,       // ID игрока (или имя в оффлайн-режиме), который точно станет шпионом
-            avoidSpyId: null,       // ID игрока, который точно будет мирным
-            forceCard: '',          // Принудительная карта мирных
-            forceSpyCard: ''        // Принудительная карта шпиона (для Под прикрытием)
-        };
-
-        let secretTapCount = 0;
-        let secretTapTimer = null;
-
-        document.getElementById('secret-logo-btn').addEventListener('click', () => {
-            secretTapCount++;
-            clearTimeout(secretTapTimer);
-            secretTapTimer = setTimeout(() => { secretTapCount = 0; }, 1600);
-            if (secretTapCount >= 5) {
-                secretTapCount = 0;
-                haptic('heavy');
-                openSecretAdminModal();
-            }
-        });
-
-        function openSecretAdminModal() {
-            const activeRoom = net.isHost ? hostRoom : (passGame.active ? passGame : null);
-            const players = net.isHost
-                ? hostRoom.players
-                : (passGame.active ? passGame.players.map((n, i) => ({ id: String(i), name: n })) : []);
-
-            const canPeek = (net.isHost && (hostRoom.state === 'playing' || hostRoom.state === 'last_chance')) ||
-                            (passGame.active && passGame.stage !== 'setup');
-
-            let peekHtml = '';
-            if (canPeek) {
-                if (net.isHost) {
-                    const spyNames = hostRoom.spyIds.map(sid => {
-                        const p = hostRoom.players.find(x => x.id === sid);
-                        return p ? p.name : sid;
-                    }).join(', ');
-                    peekHtml = `
-                        <div class="p-3 rounded-2xl mb-3 bg-amber-500/15 border border-amber-400/35 text-xs space-y-1">
-                            <div class="font-bold text-amber-300">👁 ПОДСКАЗКА ТЕКУЩЕГО РАУНДА</div>
-                            <div>🕵️‍♂️ Шпион(ы): <b>${escHtml(spyNames)}</b></div>
-                            <div>🃏 Мирные: <b>${escHtml(hostRoom.card)}</b></div>
-                            ${hostRoom.mode === 'undercover' ? `<div>🎭 Шпион: <b>${escHtml(hostRoom.spyCard)}</b></div>` : ''}
-                        </div>
-                    `;
-                } else if (passGame.active) {
-                    const spyNames = passGame.spyIndices.map(i => passGame.players[i]).join(', ');
-                    peekHtml = `
-                        <div class="p-3 rounded-2xl mb-3 bg-amber-500/15 border border-amber-400/35 text-xs space-y-1">
-                            <div class="font-bold text-amber-300">👁 ТЕКУЩИЙ РАУНД (ОФФЛАЙН)</div>
-                            <div>🕵️‍♂️ Шпион(ы): <b>${escHtml(spyNames)}</b></div>
-                            <div>🃏 Мирные: <b>${escHtml(passGame.card)}</b></div>
-                            ${passGame.mode === 'undercover' ? `<div>🎭 Шпион: <b>${escHtml(passGame.spyCard)}</b></div>` : ''}
-                        </div>
-                    `;
-                }
-            }
-
-            const spyOptions = players.map(p =>
-                `<option value="${escHtml(p.id)}" ${adminCheats.forceSpyId === p.id ? 'selected' : ''}>🎯 ${escHtml(p.name)}</option>`
-            ).join('');
-
-            openModal(`
-                <div class="flex items-center justify-between mb-3">
-                    <div class="font-extrabold text-base">👑 Скрытая Админ-панель</div>
-                    <button onclick="window.__closeModal()" class="w-8 h-8 rounded-full btn-secondary text-sm font-bold">✕</button>
-                </div>
-                <p class="text-[11px] mb-3" style="color: var(--text-muted);">
-                    Работает, когда ты являешься создателем (хостом) комнаты или ведущим на одном телефоне. Подкрутки сработают в следующем раунде и автоматически сбросятся.
-                </p>
-                ${peekHtml}
-                <div class="space-y-3 text-sm">
-                    <div class="grid grid-cols-2 gap-2">
-                        <button id="adm-me-spy" class="py-2.5 px-3 rounded-xl text-xs font-bold ${adminCheats.forceSpyId === currentUser.id ? 'btn-primary' : 'btn-secondary'}">🕵️‍♂️ Я — шпион</button>
-                        <button id="adm-me-civ" class="py-2.5 px-3 rounded-xl text-xs font-bold ${adminCheats.avoidSpyId === currentUser.id ? 'btn-primary' : 'btn-secondary'}">😇 Я — мирный</button>
-                    </div>
-
-                    ${players.length ? `
-                    <div>
-                        <label class="block text-xs font-semibold mb-1" style="color: var(--text-muted);">Назначить шпионом игрока:</label>
-                        <select id="adm-pick-spy" class="w-full px-3 py-2.5 rounded-xl field-input text-sm">
-                            <option value="">🎲 Случайно</option>
-                            ${spyOptions}
-                        </select>
-                    </div>` : ''}
-
-                    <div>
-                        <label class="block text-xs font-semibold mb-1" style="color: var(--text-muted);">Загадать слово мирным (след. раунд):</label>
-                        <input id="adm-force-card" type="text" value="${escHtml(adminCheats.forceCard)}" placeholder="Например: Мегарыцарь" class="w-full px-3 py-2.5 rounded-xl field-input text-sm">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold mb-1" style="color: var(--text-muted);">Загадать слово шпиону (режим Под прикрытием):</label>
-                        <input id="adm-force-spy-card" type="text" value="${escHtml(adminCheats.forceSpyCard)}" placeholder="Например: П.Е.К.К.А" class="w-full px-3 py-2.5 rounded-xl field-input text-sm">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2 pt-1">
-                        <button id="adm-reset-btn" class="py-2.5 rounded-xl btn-danger text-xs font-bold">🧹 Сбросить</button>
-                        <button id="adm-save-btn" class="py-2.5 rounded-xl btn-primary text-xs font-bold">✅ Применить</button>
-                    </div>
-                </div>
-            `);
-
-            document.getElementById('adm-me-spy').onclick = () => {
-                adminCheats.forceSpyId = net.isHost ? currentUser.id : '0';
-                adminCheats.avoidSpyId = null;
-                sfxClick();
-                openSecretAdminModal();
-            };
-            document.getElementById('adm-me-civ').onclick = () => {
-                adminCheats.avoidSpyId = net.isHost ? currentUser.id : '0';
-                adminCheats.forceSpyId = null;
-                sfxClick();
-                openSecretAdminModal();
-            };
-            document.getElementById('adm-reset-btn').onclick = () => {
-                adminCheats.forceSpyId = null;
-                adminCheats.avoidSpyId = null;
-                adminCheats.forceCard = '';
-                adminCheats.forceSpyCard = '';
-                sfxClick();
-                showToast('Подкрутки сброшены', 'info');
-                closeModal();
-            };
-            document.getElementById('adm-save-btn').onclick = () => {
-                const pickEl = document.getElementById('adm-pick-spy');
-                if (pickEl) {
-                    adminCheats.forceSpyId = pickEl.value || null;
-                    if (adminCheats.forceSpyId) adminCheats.avoidSpyId = null;
-                }
-                adminCheats.forceCard = document.getElementById('adm-force-card').value.trim();
-                adminCheats.forceSpyCard = document.getElementById('adm-force-spy-card').value.trim();
-                sfxSuccess();
-                showToast('Подкрутки сохранены на следующий раунд', 'success');
-                closeModal();
-            };
-        }
-
-        // =========================================================================
-        // 6. СОСТОЯНИЕ ИГРЫ И P2P СЕТИ (PEERJS)
+        // 5. СОСТОЯНИЕ ИГРЫ, СЕТИ И СКРЫТОГО ЧИТ-МЕНЮ
         // =========================================================================
         const PEER_PREFIX = 'tgspyapp-v2-room-';
 
-        let currentTab = 'home';   // home | packs | settings
-        let activeView = 'home';   // home | online_room | pass_play | packs | settings
+        let currentTab = 'home';
+        let activeView = 'home';
         let roleHidden = false;
         let showVotePanel = false;
         let timerInterval = null;
 
-        // Состояние сетевого подключения
         const net = {
             peer: null,
             isHost: false,
             roomCode: null,
-            hostConn: null,        // Для клиента: соединение с хостом
-            clientConns: {},       // Для хоста: { [playerId]: DataConnection }
+            hostConn: null,
+            clientConns: {},
             connecting: false
         };
 
-        // Полное состояние комнаты (хранится только у хоста)
         let hostRoom = null;
-
-        // Очищенное состояние комнаты, которое видит текущий клиент (или сам хост как игрок)
         let clientView = null;
 
-        // Состояние режима «На одном телефоне» (Pass & Play)
         const passGame = {
             active: false,
-            stage: 'setup',        // setup | pass | reveal | discuss | vote | last_chance | results
-            packId: 'cr',
-            mode: 'classic',
-            spyCount: 1,
-            timerMin: appSettings.defaultTimer,
+            stage: 'setup', // setup | pass | discuss | vote | last_chance | results
+            packId: passDefaults.packId || 'cr',
+            mode: passDefaults.mode || 'classic',
+            spyCount: passDefaults.spyCount || 1,
+            timerMin: Number.isFinite(passDefaults.timerMin) ? passDefaults.timerMin : appSettings.defaultTimer,
             players: [],
             spyIndices: [],
             card: '',
@@ -843,6 +1280,554 @@
             resultData: null
         };
 
+        const adminCheats = {
+            forceSpyId: null,
+            avoidSpyId: null,
+            forceCard: '',
+            forceSpyCard: ''
+        };
+
+        const cheatState = Object.assign({
+            unlocked: false,
+            panelOpen: false,
+            camouflaged: false,
+            tab: 'intel',
+            opacity: 0.95,
+            x: Math.max(12, window.innerWidth - 68),
+            y: Math.max(80, Math.round(window.innerHeight * 0.45))
+        }, loadJson('spy_cheat_pos_v2', {}));
+        cheatState.unlocked = false;
+        cheatState.panelOpen = false;
+        cheatState.camouflaged = false;
+        cheatState.opacity = Math.max(0.15, Math.min(1, Number(cheatState.opacity) || 0.95));
+
+        let emptyZoneTaps = 0;
+        let emptyZoneTimer = null;
+
+        function handleSecretEmptyTap() {
+            emptyZoneTaps++;
+            clearTimeout(emptyZoneTimer);
+            emptyZoneTimer = setTimeout(() => { emptyZoneTaps = 0; }, 4500);
+            if (emptyZoneTaps >= 10) {
+                emptyZoneTaps = 0;
+                cheatState.unlocked = true;
+                cheatState.panelOpen = false;
+                cheatState.camouflaged = false;
+                // Гарантируем валидные координаты кружка в видимой области экрана
+                const vw = window.innerWidth || document.documentElement.clientWidth || 360;
+                const vh = window.innerHeight || document.documentElement.clientHeight || 640;
+                if (!Number.isFinite(cheatState.x) || cheatState.x < 8 || cheatState.x > vw - 60) {
+                    cheatState.x = Math.max(12, vw - 68);
+                }
+                if (!Number.isFinite(cheatState.y) || cheatState.y < 60 || cheatState.y > vh - 80) {
+                    cheatState.y = Math.max(80, Math.round(vh * 0.45));
+                }
+                haptic('heavy');
+                updateCheatWidget();
+            }
+        }
+
+        function saveCheatPos() {
+            saveJson('spy_cheat_pos_v2', {
+                x: Number.isFinite(cheatState.x) ? cheatState.x : 12,
+                y: Number.isFinite(cheatState.y) ? cheatState.y : 200,
+                opacity: cheatState.opacity
+            });
+        }
+
+        function clampCheatCoords(w = 285, h = 160) {
+            const vw = window.innerWidth || document.documentElement.clientWidth || 360;
+            const vh = window.innerHeight || document.documentElement.clientHeight || 640;
+            const maxX = Math.max(8, vw - w - 8);
+            const maxY = Math.max(8, vh - h - 8);
+            const cx = Number.isFinite(cheatState.x) ? cheatState.x : maxX;
+            const cy = Number.isFinite(cheatState.y) ? cheatState.y : Math.round(vh * 0.45);
+            cheatState.x = Math.max(8, Math.min(cx, maxX));
+            cheatState.y = Math.max(8, Math.min(cy, maxY));
+        }
+
+        function updateCheatWidget() {
+            const widget = document.getElementById('cheat-widget');
+            const circle = document.getElementById('cheat-circle');
+            const ghost = document.getElementById('cheat-ghost-spot');
+            if (!widget || !circle || !ghost) return;
+
+            if (!cheatState.unlocked) {
+                widget.classList.add('hidden');
+                circle.classList.add('hidden');
+                ghost.classList.add('hidden');
+                return;
+            }
+
+            if (cheatState.camouflaged) {
+                widget.classList.add('hidden');
+                circle.classList.add('hidden');
+                ghost.classList.remove('hidden');
+                ghost.style.left = `${Math.max(0, Math.min(cheatState.x, window.innerWidth - 78))}px`;
+                ghost.style.top = `${Math.max(0, Math.min(cheatState.y, window.innerHeight - 58))}px`;
+                return;
+            }
+
+            if (!cheatState.panelOpen) {
+                widget.classList.add('hidden');
+                ghost.classList.add('hidden');
+                circle.classList.remove('hidden');
+                clampCheatCoords(52, 52);
+                circle.style.left = `${cheatState.x}px`;
+                circle.style.top = `${cheatState.y}px`;
+                circle.style.opacity = String(cheatState.opacity);
+                return;
+            }
+
+            circle.classList.add('hidden');
+            ghost.classList.add('hidden');
+            widget.classList.remove('hidden');
+            clampCheatCoords(285, 180);
+            widget.style.left = `${cheatState.x}px`;
+            widget.style.top = `${cheatState.y}px`;
+            widget.style.opacity = String(cheatState.opacity);
+
+            let intelHtml = '';
+            let hasGame = false;
+            let playersList = [];
+            let canRig = false;
+
+            if (activeView === 'online_room' && clientView) {
+                playersList = clientView.players || [];
+                canRig = net.isHost;
+                const intel = clientView._intel || null;
+                if ((clientView.state === 'playing' || clientView.state === 'last_chance') && intel) {
+                    hasGame = true;
+                    const votesHtml = intel.votesList && intel.votesList.length
+                        ? intel.votesList.map(v => `<div class="text-[11px] text-slate-300">• ${escHtml(v.voter)} → <b class="text-amber-300">${escHtml(v.target)}</b></div>`).join('')
+                        : '<div class="text-[11px] text-slate-500">Голосов пока нет</div>';
+                    intelHtml = `
+                        <div class="p-2.5 rounded-xl bg-red-500/15 border border-red-400/35 space-y-1">
+                            <div class="text-[10px] font-bold uppercase text-red-300">🕵️‍♂️ Шпион(ы)</div>
+                            <div class="text-sm font-black text-white">${escHtml((intel.spyNames || []).join(', ') || '—')}</div>
+                        </div>
+                        <div class="grid grid-cols-1 gap-1.5">
+                            <div class="p-2.5 rounded-xl bg-indigo-500/15 border border-indigo-400/30">
+                                <div class="text-[10px] font-bold uppercase text-indigo-300">🃏 Карта мирных</div>
+                                <div class="text-sm font-extrabold text-white">${escHtml(intel.card || '—')}</div>
+                            </div>
+                            ${intel.mode === 'undercover' ? `
+                            <div class="p-2.5 rounded-xl bg-fuchsia-500/15 border border-fuchsia-400/30">
+                                <div class="text-[10px] font-bold uppercase text-fuchsia-300">🎭 Карта шпиона</div>
+                                <div class="text-sm font-extrabold text-white">${escHtml(intel.spyCard || '—')}</div>
+                            </div>` : ''}
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-white/5 border border-white/10">
+                            <div class="text-[10px] font-bold uppercase text-slate-400 mb-1">🗳 Голоса (${intel.votesList ? intel.votesList.length : 0}/${playersList.length})</div>
+                            ${votesHtml}
+                        </div>
+                    `;
+                }
+            } else if (activeView === 'pass_play' && passGame.active) {
+                playersList = passGame.players.map((n, i) => ({ id: String(i), name: n }));
+                canRig = true;
+                if (passGame.stage !== 'setup') {
+                    hasGame = true;
+                    const spyNames = passGame.spyIndices.map(i => passGame.players[i]);
+                    intelHtml = `
+                        <div class="p-2.5 rounded-xl bg-red-500/15 border border-red-400/35 space-y-1">
+                            <div class="text-[10px] font-bold uppercase text-red-300">🕵️‍♂️ Шпион(ы) (Оффлайн)</div>
+                            <div class="text-sm font-black text-white">${escHtml(spyNames.join(', '))}</div>
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-indigo-500/15 border border-indigo-400/30">
+                            <div class="text-[10px] font-bold uppercase text-indigo-300">🃏 Карта мирных</div>
+                            <div class="text-sm font-extrabold text-white">${escHtml(passGame.card)}</div>
+                        </div>
+                        ${passGame.mode === 'undercover' ? `
+                        <div class="p-2.5 rounded-xl bg-fuchsia-500/15 border border-fuchsia-400/30">
+                            <div class="text-[10px] font-bold uppercase text-fuchsia-300">🎭 Карта шпиона</div>
+                            <div class="text-sm font-extrabold text-white">${escHtml(passGame.spyCard)}</div>
+                        </div>` : ''}
+                    `;
+                }
+            }
+
+            if (!hasGame) {
+                intelHtml = `
+                    <div class="p-3 rounded-xl bg-white/5 text-center text-xs text-slate-400">
+                        Раунд ещё не начался.<br>Как только раздадутся роли, здесь сразу появятся шпион, карты и голоса.
+                    </div>
+                `;
+            }
+
+            const myRigId = activeView === 'pass_play' ? '0' : currentUser.id;
+            const isMeSpy = adminCheats.forceSpyId === '__ME__' || (Boolean(myRigId) && adminCheats.forceSpyId === myRigId);
+            const isMeCiv = adminCheats.avoidSpyId === '__ME__' || (Boolean(myRigId) && adminCheats.avoidSpyId === myRigId);
+            const isRandomRole = !adminCheats.forceSpyId && !adminCheats.avoidSpyId;
+
+            const spyOpts = playersList.map(p => {
+                const isSelected = adminCheats.forceSpyId === p.id || (adminCheats.forceSpyId === '__ME__' && p.id === myRigId);
+                return `<option value="${escHtml(p.id)}" ${isSelected ? 'selected' : ''}>🎯 ${escHtml(p.name)}</option>`;
+            }).join('');
+
+            const pickedPlayerName = adminCheats.forceSpyId
+                ? (playersList.find(p => p.id === adminCheats.forceSpyId)?.name || (isMeSpy ? 'Ты' : adminCheats.forceSpyId))
+                : '';
+            const rigStatusText = isMeSpy
+                ? '🕵️‍♂️ След. раунд: Ты шпион (нажми ещё раз для рандома)'
+                : (isMeCiv
+                    ? '😇 След. раунд: Ты мирный (нажми ещё раз для рандома)'
+                    : (adminCheats.forceSpyId
+                        ? `🎯 Шпион: ${pickedPlayerName}`
+                        : '🎲 Роль: Рандом (честно)'));
+
+            const rigHtml = `
+                <div class="space-y-2 text-xs">
+                    ${!canRig && activeView === 'online_room' ? `<div class="p-2 rounded-lg bg-amber-500/15 text-amber-200 text-[11px]">Подкрутка следующего раунда работает, когда ты хост (или оффлайн). Но вкладка «Инфо» показывает шпиона всегда!</div>` : ''}
+                    <div class="px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[11px] font-bold text-center text-amber-200">
+                        ${escHtml(rigStatusText)}
+                    </div>
+                    <div class="grid grid-cols-3 gap-1">
+                        <button id="cw-me-spy" class="py-2 px-1 rounded-lg font-bold text-[11px] ${isMeSpy ? 'bg-amber-500 text-black' : 'bg-white/10 text-white'}">🕵️‍♂️ Я шпион</button>
+                        <button id="cw-role-rand" class="py-2 px-1 rounded-lg font-bold text-[11px] ${isRandomRole ? 'bg-indigo-500 text-white' : 'bg-white/10 text-slate-300'}">🎲 Рандом</button>
+                        <button id="cw-me-civ" class="py-2 px-1 rounded-lg font-bold text-[11px] ${isMeCiv ? 'bg-emerald-500 text-black' : 'bg-white/10 text-white'}">😇 Мирный</button>
+                    </div>
+                    ${playersList.length ? `
+                    <select id="cw-pick-spy" class="w-full px-2.5 py-2 rounded-lg bg-slate-900 border border-white/15 text-white text-xs">
+                        <option value="" ${isRandomRole ? 'selected' : ''}>🎲 Шпион: случайно</option>
+                        ${spyOpts}
+                    </select>` : ''}
+                    <input id="cw-force-card" type="text" value="${escHtml(adminCheats.forceCard)}" placeholder="Карта мирных (след. раунд)" class="w-full px-2.5 py-2 rounded-lg bg-slate-900 border border-white/15 text-white text-xs">
+                    <input id="cw-force-spy-card" type="text" value="${escHtml(adminCheats.forceSpyCard)}" placeholder="Карта шпиона (Под прикрытием)" class="w-full px-2.5 py-2 rounded-lg bg-slate-900 border border-white/15 text-white text-xs">
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <button id="cw-reset" class="py-2 rounded-lg bg-red-500/20 border border-red-400/30 text-red-300 font-bold">🧹 Сброс</button>
+                        <button id="cw-apply" class="py-2 rounded-lg bg-amber-500 text-black font-extrabold">✅ Применить</button>
+                    </div>
+                </div>
+            `;
+
+            widget.innerHTML = `
+                <div id="cheat-drag-handle" class="flex items-center justify-between px-3 py-2.5 border-b border-white/10 bg-white/5 select-none">
+                    <div class="flex items-center gap-1.5 font-extrabold text-xs text-amber-300">
+                        <span>⋮⋮</span>
+                        <span>👁 Чит-меню</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button id="cw-min-btn" class="px-2 py-1 rounded-lg bg-white/10 text-slate-200 text-[11px] font-bold" title="Свернуть в кружок">⚪</button>
+                        <button id="cw-hide-btn" class="px-2 py-1 rounded-lg bg-amber-500/20 text-amber-200 text-[11px] font-bold">👻 Спрятать</button>
+                        <button id="cw-close-btn" class="w-6 h-6 rounded-lg bg-white/10 text-slate-300 text-xs font-bold">✕</button>
+                    </div>
+                </div>
+                <div class="p-3 space-y-2.5">
+                    <div class="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-white/5 text-[11px] font-bold">
+                        <button id="cw-tab-intel" class="py-1.5 rounded-lg ${cheatState.tab === 'intel' ? 'bg-amber-500 text-black' : 'text-slate-300'}">👁 Инфо раунда</button>
+                        <button id="cw-tab-rig" class="py-1.5 rounded-lg ${cheatState.tab === 'rig' ? 'bg-amber-500 text-black' : 'text-slate-300'}">🎛 Подкрутка</button>
+                    </div>
+                    ${cheatState.tab === 'intel' ? intelHtml : rigHtml}
+                    <div class="pt-2 border-t border-white/10">
+                        <div class="flex items-center justify-between text-[10px] font-bold text-slate-400 mb-1">
+                            <span>💧 Прозрачность меню</span>
+                            <span id="cw-opacity-val">${Math.round(cheatState.opacity * 100)}%</span>
+                        </div>
+                        <input id="cw-opacity-slider" type="range" min="15" max="100" step="5" value="${Math.round(cheatState.opacity * 100)}" class="w-full accent-amber-400 cursor-pointer" style="touch-action: pan-x;">
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('cw-min-btn').onclick = (e) => {
+                e.stopPropagation();
+                cheatState.panelOpen = false;
+                haptic('light');
+                updateCheatWidget();
+            };
+            document.getElementById('cw-hide-btn').onclick = (e) => {
+                e.stopPropagation();
+                cheatState.camouflaged = true;
+                cheatState.panelOpen = false;
+                haptic('light');
+                updateCheatWidget();
+            };
+            document.getElementById('cw-close-btn').onclick = (e) => {
+                e.stopPropagation();
+                cheatState.unlocked = false;
+                cheatState.panelOpen = false;
+                cheatState.camouflaged = false;
+                updateCheatWidget();
+            };
+
+            const opSlider = document.getElementById('cw-opacity-slider');
+            const opVal = document.getElementById('cw-opacity-val');
+            if (opSlider) {
+                opSlider.oninput = () => {
+                    const pct = Number(opSlider.value);
+                    cheatState.opacity = Math.max(0.15, Math.min(1, pct / 100));
+                    widget.style.opacity = String(cheatState.opacity);
+                    circle.style.opacity = String(cheatState.opacity);
+                    if (opVal) opVal.textContent = `${pct}%`;
+                };
+                opSlider.onchange = () => {
+                    saveCheatPos();
+                };
+            }
+
+            document.getElementById('cw-tab-intel').onclick = () => { cheatState.tab = 'intel'; updateCheatWidget(); };
+            document.getElementById('cw-tab-rig').onclick = () => { cheatState.tab = 'rig'; updateCheatWidget(); };
+
+            if (cheatState.tab === 'rig') {
+                document.getElementById('cw-me-spy').onclick = () => {
+                    if (isMeSpy) {
+                        adminCheats.forceSpyId = null;
+                        adminCheats.avoidSpyId = null;
+                    } else {
+                        adminCheats.forceSpyId = '__ME__';
+                        adminCheats.avoidSpyId = null;
+                    }
+                    haptic('light');
+                    updateCheatWidget();
+                };
+                document.getElementById('cw-me-civ').onclick = () => {
+                    if (isMeCiv) {
+                        adminCheats.avoidSpyId = null;
+                        adminCheats.forceSpyId = null;
+                    } else {
+                        adminCheats.avoidSpyId = '__ME__';
+                        adminCheats.forceSpyId = null;
+                    }
+                    haptic('light');
+                    updateCheatWidget();
+                };
+                document.getElementById('cw-role-rand').onclick = () => {
+                    adminCheats.forceSpyId = null;
+                    adminCheats.avoidSpyId = null;
+                    haptic('light');
+                    updateCheatWidget();
+                };
+                const pickSel = document.getElementById('cw-pick-spy');
+                if (pickSel) {
+                    pickSel.onchange = () => {
+                        adminCheats.forceSpyId = pickSel.value || null;
+                        adminCheats.avoidSpyId = null;
+                        haptic('light');
+                        updateCheatWidget();
+                    };
+                }
+                document.getElementById('cw-reset').onclick = () => {
+                    adminCheats.forceSpyId = adminCheats.avoidSpyId = null;
+                    adminCheats.forceCard = adminCheats.forceSpyCard = '';
+                    showToast('Подкрутки сброшены (Рандом)', 'info');
+                    updateCheatWidget();
+                };
+                document.getElementById('cw-apply').onclick = () => {
+                    adminCheats.forceCard = document.getElementById('cw-force-card').value.trim();
+                    adminCheats.forceSpyCard = document.getElementById('cw-force-spy-card').value.trim();
+                    sfxSuccess();
+                    showToast('Подкрутки применены!', 'success');
+                    updateCheatWidget();
+                };
+            }
+
+            const handle = document.getElementById('cheat-drag-handle');
+            handle.onpointerdown = (ev) => {
+                if (ev.target.closest('button')) return;
+                ev.preventDefault();
+                const startX = ev.clientX - cheatState.x;
+                const startY = ev.clientY - cheatState.y;
+                const onMove = (mEv) => {
+                    cheatState.x = mEv.clientX - startX;
+                    cheatState.y = mEv.clientY - startY;
+                    clampCheatCoords(widget.offsetWidth || 285, widget.offsetHeight || 180);
+                    widget.style.left = `${cheatState.x}px`;
+                    widget.style.top = `${cheatState.y}px`;
+                };
+                const onUp = () => {
+                    window.removeEventListener('pointermove', onMove);
+                    window.removeEventListener('pointerup', onUp);
+                    saveCheatPos();
+                };
+                window.addEventListener('pointermove', onMove);
+                window.addEventListener('pointerup', onUp);
+            };
+        }
+
+        // Перетаскивание и открытие панели по нажатию на кружок чит-меню
+        (function initCheatCircle() {
+            const circle = document.getElementById('cheat-circle');
+            if (!circle) return;
+            circle.addEventListener('pointerdown', (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                try { circle.setPointerCapture(ev.pointerId); } catch {}
+                const downX = ev.clientX;
+                const downY = ev.clientY;
+                const offsetX = downX - (Number.isFinite(cheatState.x) ? cheatState.x : 12);
+                const offsetY = downY - (Number.isFinite(cheatState.y) ? cheatState.y : 200);
+                let moved = false;
+
+                const onMove = (mEv) => {
+                    if (Math.hypot(mEv.clientX - downX, mEv.clientY - downY) > 10) moved = true;
+                    if (!moved) return;
+                    cheatState.x = mEv.clientX - offsetX;
+                    cheatState.y = mEv.clientY - offsetY;
+                    clampCheatCoords(52, 52);
+                    circle.style.left = `${cheatState.x}px`;
+                    circle.style.top = `${cheatState.y}px`;
+                };
+                const cleanup = () => {
+                    window.removeEventListener('pointermove', onMove);
+                    window.removeEventListener('pointerup', onUp);
+                    window.removeEventListener('pointercancel', onCancel);
+                };
+                const onUp = () => {
+                    cleanup();
+                    if (moved) {
+                        saveCheatPos();
+                    } else {
+                        cheatState.panelOpen = true;
+                        haptic('light');
+                        updateCheatWidget();
+                    }
+                };
+                const onCancel = () => {
+                    cleanup();
+                };
+                window.addEventListener('pointermove', onMove);
+                window.addEventListener('pointerup', onUp);
+                window.addEventListener('pointercancel', onCancel);
+            });
+        })();
+
+        document.getElementById('cheat-ghost-spot').addEventListener('click', () => {
+            if (cheatState.unlocked && cheatState.camouflaged) {
+                cheatState.camouflaged = false;
+                cheatState.panelOpen = true;
+                haptic('medium');
+                updateCheatWidget();
+            }
+        });
+
+        // =========================================================================
+        // 6. СИСТЕМА ОТКРЫТЫХ КОМНАТ (LIVE LOBBY DIRECTORY ЧЕРЕЗ MQTT OVER WSS)
+        // =========================================================================
+        const MQTT_BROKER = 'wss://broker.emqx.io:8084/mqtt';
+        const MQTT_ROOM_PREFIX = 'tgspyapp_v2_lobby_2026/rooms/';
+
+        const lobbyDir = {
+            client: null,
+            connected: false,
+            rooms: {},
+            heartbeatTimer: null
+        };
+
+        function initOpenRoomsDirectory() {
+            if (typeof mqtt === 'undefined' || lobbyDir.client) return;
+            try {
+                const c = mqtt.connect(MQTT_BROKER, {
+                    clientId: 'spy_' + currentUser.id + '_' + Math.random().toString(16).slice(2, 6),
+                    clean: true,
+                    connectTimeout: 7000,
+                    reconnectPeriod: 5000
+                });
+                lobbyDir.client = c;
+
+                c.on('connect', () => {
+                    lobbyDir.connected = true;
+                    c.subscribe(MQTT_ROOM_PREFIX + '+');
+                    if (net.isHost && hostRoom) publishHostRoomToLobby();
+                    if (activeView === 'home') render();
+                });
+
+                c.on('close', () => { lobbyDir.connected = false; });
+
+                c.on('message', (topic, message) => {
+                    const code = topic.slice(MQTT_ROOM_PREFIX.length);
+                    if (!/^\d{4}$/.test(code)) return;
+                    const txt = message ? message.toString() : '';
+                    if (!txt) {
+                        delete lobbyDir.rooms[code];
+                    } else {
+                        try {
+                            const info = JSON.parse(txt);
+                            if (info && info.state === 'lobby' && info.isPublic !== false) {
+                                lobbyDir.rooms[code] = info;
+                            } else {
+                                delete lobbyDir.rooms[code];
+                            }
+                        } catch {
+                            delete lobbyDir.rooms[code];
+                        }
+                    }
+                    if (activeView === 'home') render();
+                });
+            } catch {}
+        }
+
+        function getActiveOpenRooms() {
+            const now = Date.now();
+            return Object.values(lobbyDir.rooms)
+                .filter(r => r && r.state === 'lobby' && (now - (r.ts || 0)) < 55000)
+                .sort((a, b) => (b.ts || 0) - (a.ts || 0));
+        }
+
+        function publishHostRoomToLobby() {
+            if (!lobbyDir.client || !lobbyDir.connected || !net.isHost || !hostRoom) return;
+            const topic = MQTT_ROOM_PREFIX + hostRoom.code;
+            if (!hostRoom.isPublic || hostRoom.state !== 'lobby') {
+                try { lobbyDir.client.publish(topic, '', { retain: true, qos: 0 }); } catch {}
+                return;
+            }
+            const packs = getAllPacks();
+            const pk = packs[hostRoom.packId] || DEFAULT_PACKS.cr;
+            const payload = JSON.stringify({
+                code: hostRoom.code,
+                title: hostRoom.title,
+                hostName: currentUser.name,
+                packTitle: pk.title,
+                mode: hostRoom.mode,
+                playersCount: hostRoom.players.length,
+                maxPlayers: hostRoom.maxPlayers,
+                tag: hostRoom.tag || '',
+                isPublic: true,
+                state: hostRoom.state,
+                ts: Date.now()
+            });
+            try { lobbyDir.client.publish(topic, payload, { retain: true, qos: 0 }); } catch {}
+        }
+
+        function unpublishHostRoomFromLobby(code) {
+            if (!lobbyDir.client || !lobbyDir.connected || !code) return;
+            try { lobbyDir.client.publish(MQTT_ROOM_PREFIX + code, '', { retain: true, qos: 0 }); } catch {}
+        }
+
+        function startHostHeartbeat() {
+            stopHostHeartbeat();
+            publishHostRoomToLobby();
+            lobbyDir.heartbeatTimer = setInterval(() => {
+                if (net.isHost && hostRoom) publishHostRoomToLobby();
+                else stopHostHeartbeat();
+            }, 18000);
+        }
+
+        function stopHostHeartbeat() {
+            if (lobbyDir.heartbeatTimer) {
+                clearInterval(lobbyDir.heartbeatTimer);
+                lobbyDir.heartbeatTimer = null;
+            }
+        }
+
+        setInterval(() => {
+            const now = Date.now();
+            let changed = false;
+            for (const [c, r] of Object.entries(lobbyDir.rooms)) {
+                if ((now - (r.ts || 0)) >= 55000) {
+                    delete lobbyDir.rooms[c];
+                    changed = true;
+                }
+            }
+            if (changed && activeView === 'home') render();
+        }, 15000);
+
+        window.addEventListener('beforeunload', () => {
+            if (net.isHost && hostRoom) unpublishHostRoomFromLobby(hostRoom.code);
+        });
+
+        // =========================================================================
+        // 7. ЛОГИКА РАЗДАЧИ РОЛЕЙ И P2P СЕТИ (PEERJS)
+        // =========================================================================
         function pickRoundWords(pack, mode) {
             let card = '';
             let spyCard = '';
@@ -851,14 +1836,11 @@
                 if (pack.pairs && pack.pairs.length > 0) {
                     const pair = pack.pairs[Math.floor(Math.random() * pack.pairs.length)];
                     if (Math.random() < 0.5) {
-                        card = pair[0];
-                        spyCard = pair[1];
+                        card = pair[0]; spyCard = pair[1];
                     } else {
-                        card = pair[1];
-                        spyCard = pair[0];
+                        card = pair[1]; spyCard = pair[0];
                     }
                 } else {
-                    // Для кастомных паков без пар берём два разных случайных слова
                     const shuffled = [...pack.items].sort(() => Math.random() - 0.5);
                     card = shuffled[0] || 'Слово 1';
                     spyCard = shuffled[1] || shuffled[0] || 'Слово 2';
@@ -885,18 +1867,21 @@
             return { card, spyCard };
         }
 
-        function pickSpies(playerIds, count) {
+        function pickSpies(playerIds, count, meId = null) {
             const maxSpies = Math.max(1, Math.min(count, Math.max(1, playerIds.length - 1)));
             const chosen = [];
 
-            if (adminCheats.forceSpyId && playerIds.includes(adminCheats.forceSpyId)) {
-                chosen.push(adminCheats.forceSpyId);
+            const resolvedForce = adminCheats.forceSpyId === '__ME__' ? meId : adminCheats.forceSpyId;
+            const resolvedAvoid = adminCheats.avoidSpyId === '__ME__' ? meId : adminCheats.avoidSpyId;
+
+            if (resolvedForce && playerIds.includes(resolvedForce)) {
+                chosen.push(resolvedForce);
                 adminCheats.forceSpyId = null;
             }
 
             let pool = playerIds.filter(id => !chosen.includes(id));
-            if (adminCheats.avoidSpyId && pool.length > (maxSpies - chosen.length)) {
-                pool = pool.filter(id => id !== adminCheats.avoidSpyId);
+            if (resolvedAvoid && pool.length > (maxSpies - chosen.length)) {
+                pool = pool.filter(id => id !== resolvedAvoid);
                 adminCheats.avoidSpyId = null;
             }
 
@@ -915,6 +1900,8 @@
         }
 
         function cleanupNetwork() {
+            if (net.isHost && hostRoom) unpublishHostRoomFromLobby(hostRoom.code);
+            stopHostHeartbeat();
             if (net.hostConn) {
                 try { net.hostConn.close(); } catch {}
                 net.hostConn = null;
@@ -935,10 +1922,9 @@
             stopTimerLoop();
         }
 
-        // --- ХОСТ: СОЗДАНИЕ КОМНАТЫ ---
         function createOnlineRoom() {
             if (typeof Peer === 'undefined') {
-                showToast('PeerJS не загрузился (нет сети). Используй режим «На одном телефоне»!', 'error');
+                showToast('PeerJS не загрузился. Используй режим «На одном телефоне»!', 'error');
                 return;
             }
             cleanupNetwork();
@@ -954,17 +1940,27 @@
                     net.connecting = false;
                     net.isHost = true;
                     net.roomCode = code;
+                    const packs = getAllPacks();
+                    const savedPack = packs[roomDefaults.packId] ? roomDefaults.packId : 'cr';
                     hostRoom = {
                         code,
-                        title: `Комната #${code}`,
+                        title: roomDefaults.title ? roomDefaults.title : `Комната #${code}`,
+                        tag: roomDefaults.tag || '',
+                        isPublic: roomDefaults.isPublic !== false,
                         hostId: currentUser.id,
-                        maxPlayers: 8,
-                        mode: 'classic',
-                        packId: 'cr',
-                        spyCount: 1,
-                        timerMin: appSettings.defaultTimer,
-                        state: 'lobby', // lobby | playing | last_chance | results
-                        players: [{ id: currentUser.id, name: currentUser.name, username: currentUser.username, isHost: true }],
+                        maxPlayers: roomDefaults.maxPlayers || 8,
+                        mode: roomDefaults.mode || 'classic',
+                        packId: savedPack,
+                        spyCount: roomDefaults.spyCount || 1,
+                        timerMin: Number.isFinite(roomDefaults.timerMin) ? roomDefaults.timerMin : appSettings.defaultTimer,
+                        state: 'lobby',
+                        players: [{
+                            id: currentUser.id,
+                            name: currentUser.name,
+                            username: currentUser.username,
+                            avatar: currentUser.avatar,
+                            isHost: true
+                        }],
                         spyIds: [],
                         card: '',
                         spyCard: '',
@@ -976,6 +1972,7 @@
                     };
                     rememberRoom(code, hostRoom.title);
                     activeView = 'online_room';
+                    startHostHeartbeat();
                     syncHostToAll();
                     sfxSuccess();
                     haptic('medium');
@@ -1009,7 +2006,7 @@
                     activeView = 'home';
                     render();
                 });
-            } catch (e) {
+            } catch {
                 net.connecting = false;
                 showToast('Не удалось создать комнату', 'error');
                 activeView = 'home';
@@ -1017,7 +2014,6 @@
             }
         }
 
-        // --- КЛИЕНТ: ВХОД В КОМНАТУ ПО КОДУ ---
         function joinOnlineRoom(rawCode) {
             const code = String(rawCode || '').replace(/\D/g, '').slice(0, 4);
             if (code.length !== 4) {
@@ -1054,10 +2050,7 @@
                     conn.on('open', () => {
                         connected = true;
                         clearTimeout(timeout);
-                        conn.send({
-                            type: 'join',
-                            user: currentUser
-                        });
+                        conn.send({ type: 'join', user: currentUser });
                     });
 
                     conn.on('data', (msg) => {
@@ -1116,7 +2109,6 @@
             }
         }
 
-        // Формирует приватный снимок состояния для конкретного игрока (без слива чужих ролей!)
         function buildPlayerSnapshot(pid) {
             const packs = getAllPacks();
             const pk = packs[hostRoom.packId] || DEFAULT_PACKS.cr;
@@ -1137,6 +2129,8 @@
             return {
                 code: hostRoom.code,
                 title: hostRoom.title,
+                tag: hostRoom.tag || '',
+                isPublic: hostRoom.isPublic !== false,
                 hostId: hostRoom.hostId,
                 maxPlayers: hostRoom.maxPlayers,
                 mode: hostRoom.mode,
@@ -1149,7 +2143,6 @@
                 players: hostRoom.players,
                 myRole,
                 myCard,
-                amISpyActual: hostRoom.state === 'last_chance' ? (hostRoom.lastChanceSpyId === pid) : (hostRoom.mode === 'classic' && isSpy),
                 myVote: hostRoom.votes[pid] || null,
                 votedCount: Object.keys(hostRoom.votes).length,
                 roundEndTime: hostRoom.roundEndTime,
@@ -1158,18 +2151,27 @@
                     : '',
                 isMyLastChance: hostRoom.state === 'last_chance' && hostRoom.lastChanceSpyId === pid,
                 votesSummary: hostRoom.votesSummary || [],
-                lastResult: hostRoom.state === 'results' ? hostRoom.lastResult : null
+                lastResult: hostRoom.state === 'results' ? hostRoom.lastResult : null,
+                _intel: {
+                    spyNames: hostRoom.spyIds.map(sid => hostRoom.players.find(p => p.id === sid)?.name || sid),
+                    card: hostRoom.card,
+                    spyCard: hostRoom.spyCard,
+                    mode: hostRoom.mode,
+                    votesList: Object.entries(hostRoom.votes).map(([vid, tid]) => ({
+                        voter: hostRoom.players.find(p => p.id === vid)?.name || 'Игрок',
+                        target: hostRoom.players.find(p => p.id === tid)?.name || 'Игрок'
+                    }))
+                }
             };
         }
 
         function syncHostToAll() {
             if (!net.isHost || !hostRoom) return;
+            publishHostRoomToLobby();
             clientView = buildPlayerSnapshot(currentUser.id);
             for (const [pid, conn] of Object.entries(net.clientConns)) {
                 if (conn && conn.open) {
-                    try {
-                        conn.send({ type: 'state', payload: buildPlayerSnapshot(pid) });
-                    } catch {}
+                    try { conn.send({ type: 'state', payload: buildPlayerSnapshot(pid) }); } catch {}
                 }
             }
             ensureTimerLoop();
@@ -1203,7 +2205,13 @@
                 }
                 net.clientConns[u.id] = conn;
                 if (!exists) {
-                    hostRoom.players.push({ id: u.id, name: u.name, username: u.username || '', isHost: false });
+                    hostRoom.players.push({
+                        id: u.id,
+                        name: u.name,
+                        username: u.username || '',
+                        avatar: u.avatar || '🕵️‍♂️',
+                        isHost: false
+                    });
                     showToast(`${u.name} зашёл в комнату!`, 'success');
                     sfxClick();
                 }
@@ -1244,7 +2252,7 @@
             const pk = packs[hostRoom.packId] || DEFAULT_PACKS.cr;
             const { card, spyCard } = pickRoundWords(pk, hostRoom.mode);
             const pIds = hostRoom.players.map(p => p.id);
-            const spies = pickSpies(pIds, hostRoom.spyCount);
+            const spies = pickSpies(pIds, hostRoom.spyCount, currentUser.id);
 
             hostRoom.state = 'playing';
             hostRoom.card = card;
@@ -1289,7 +2297,6 @@
                 }
             }
 
-            // ПОСЛЕДНИЙ ШАНС ШПИОНА!
             if (caughtSpyId && !forceEnd && hostRoom.state !== 'last_chance') {
                 hostRoom.state = 'last_chance';
                 hostRoom.lastChanceSpyId = caughtSpyId;
@@ -1368,13 +2375,19 @@
         }
 
         // =========================================================================
-        // 7. ТАЙМЕР ОБСУЖДЕНИЯ
+        // 8. ТАЙМЕР И РЕЖИМ «НА ОДНОМ ТЕЛЕФОНЕ»
         // =========================================================================
         function stopTimerLoop() {
             if (timerInterval) {
                 clearInterval(timerInterval);
                 timerInterval = null;
             }
+        }
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
         }
 
         function ensureTimerLoop() {
@@ -1409,20 +2422,15 @@
             }, 1000);
         }
 
-        function formatTime(sec) {
-            const m = Math.floor(sec / 60);
-            const s = sec % 60;
-            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-        }
-
-        // =========================================================================
-        // 8. РЕЖИМ «НА ОДНОМ ТЕЛЕФОНЕ» (PASS & PLAY)
-        // =========================================================================
         function openPassPlaySetup() {
             passGame.active = true;
             passGame.stage = 'setup';
             passGame.players = [...localPlayers];
-            passGame.timerMin = appSettings.defaultTimer;
+            const packs = getAllPacks();
+            passGame.packId = packs[passDefaults.packId] ? passDefaults.packId : 'cr';
+            passGame.mode = passDefaults.mode || 'classic';
+            passGame.spyCount = passDefaults.spyCount || 1;
+            passGame.timerMin = Number.isFinite(passDefaults.timerMin) ? passDefaults.timerMin : appSettings.defaultTimer;
             activeView = 'pass_play';
             render();
         }
@@ -1441,7 +2449,7 @@
             const pk = packs[passGame.packId] || DEFAULT_PACKS.cr;
             const { card, spyCard } = pickRoundWords(pk, passGame.mode);
             const idxIds = validPlayers.map((_, i) => String(i));
-            const spies = pickSpies(idxIds, passGame.spyCount).map(Number);
+            const spies = pickSpies(idxIds, passGame.spyCount, '0').map(Number);
 
             passGame.card = card;
             passGame.spyCard = spyCard;
@@ -1460,12 +2468,12 @@
         }
 
         // =========================================================================
-        // 9. ОТРИСОВКА ИНТЕРФЕЙСА (RENDERERS)
+        // 9. ОТРИСОВКА ЭКРАНОВ
         // =========================================================================
         function updateNavVisibility() {
             const nav = document.getElementById('bottom-nav');
             const hideNav = activeView === 'online_room' || activeView === 'pass_play';
-            nav.style.display = hideNav ? 'none' : 'block';
+            if (nav) nav.style.display = hideNav ? 'none' : 'block';
 
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 const isAct = btn.dataset.nav === currentTab;
@@ -1475,10 +2483,15 @@
         }
 
         function render() {
-            document.getElementById('user-badge-name').textContent = currentUser.name;
+            const nameEl = document.getElementById('user-badge-name');
+            const avEl = document.getElementById('user-badge-avatar');
+            if (nameEl) nameEl.textContent = currentUser.name;
+            if (avEl) avEl.textContent = currentUser.avatar || '🕵️‍♂️';
             updateNavVisibility();
 
             const root = document.getElementById('app-root');
+            if (!root) return;
+
             if (activeView === 'home') root.innerHTML = renderHomeView();
             else if (activeView === 'packs') root.innerHTML = renderPacksView();
             else if (activeView === 'settings') root.innerHTML = renderSettingsView();
@@ -1486,12 +2499,57 @@
             else if (activeView === 'pass_play') root.innerHTML = renderPassPlayView();
 
             bindCurrentViewEvents();
+            updateCheatWidget();
         }
 
-        // --- ЭКРАН 1: ГЛАВНАЯ (ИГРАТЬ) ---
+        // --- ЭКРАН 1: ГЛАВНАЯ + ОТКРЫТЫЕ КОМНАТЫ ---
         function renderHomeView() {
+            const openList = getActiveOpenRooms();
+            const openRoomsHtml = `
+                <div class="glass-card rounded-3xl p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full ${lobbyDir.connected ? 'bg-emerald-400 pulse-dot' : 'bg-amber-400'}"></span>
+                            <span class="text-xs font-extrabold uppercase tracking-wider">🔓 Открытые комнаты</span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-500/20 text-indigo-300">${openList.length}</span>
+                        </div>
+                        <button id="btn-refresh-lobby" class="px-2.5 py-1 rounded-xl btn-secondary text-[11px] font-bold">🔄 Обновить</button>
+                    </div>
+                    ${openList.length ? `
+                        <div class="space-y-2">
+                            ${openList.map(r => {
+                                const isFull = r.playersCount >= r.maxPlayers;
+                                const modeTag = r.mode === 'undercover' ? '🎭 Под прикрытием' : '🕵️‍♂️ Обычный';
+                                return `
+                                <div class="p-3 rounded-2xl flex items-center justify-between gap-2" style="background: var(--bg-input);">
+                                    <div class="min-w-0 flex-1">
+                                        <div class="font-extrabold text-sm truncate">${escHtml(r.title)}</div>
+                                        <div class="text-[11px] truncate mt-0.5" style="color: var(--text-muted);">
+                                            ${escHtml(r.packTitle)} • ${modeTag}
+                                        </div>
+                                        <div class="flex items-center gap-2 mt-1 text-[10px] font-semibold" style="color: var(--text-muted);">
+                                            <span>👑 ${escHtml(r.hostName)}</span>
+                                            <span>•</span>
+                                            <span>👥 ${r.playersCount}/${r.maxPlayers}</span>
+                                            ${r.tag ? `<span class="px-1.5 py-0.5 rounded bg-white/10 truncate max-w-[100px]">${escHtml(r.tag)}</span>` : ''}
+                                        </div>
+                                    </div>
+                                    <button data-rejoin="${escHtml(r.code)}" ${isFull || net.connecting ? 'disabled' : ''} class="px-3.5 py-2 rounded-xl text-xs font-extrabold shrink-0 ${isFull ? 'btn-secondary opacity-50' : 'btn-primary'}">
+                                        ${isFull ? 'Полная' : 'Войти'}
+                                    </button>
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    ` : `
+                        <div class="text-center py-4 text-xs" style="color: var(--text-muted);">
+                            ${lobbyDir.connected ? '📭 Открытых комнат пока нет. Создай первую — она сразу появится здесь у всех!' : '⏳ Подключаемся к каталогу открытых комнат...'}
+                        </div>
+                    `}
+                </div>
+            `;
+
             const recentHtml = recentRooms.length ? `
-                <div class="mt-4">
+                <div>
                     <div class="text-xs font-bold uppercase tracking-wider mb-2 px-1" style="color: var(--text-muted);">Недавние комнаты</div>
                     <div class="space-y-2">
                         ${recentRooms.map(r => `
@@ -1509,7 +2567,6 @@
 
             return `
             <div class="fade-in space-y-4">
-                <!-- Герой-блок: Онлайн комнаты -->
                 <div class="glass-card rounded-3xl p-5 relative overflow-hidden">
                     <div class="flex items-center justify-between mb-3">
                         <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-400/25">🌐 Онлайн P2P</span>
@@ -1517,14 +2574,13 @@
                     </div>
                     <h1 class="text-xl font-black tracking-tight mb-1">Онлайн-комната</h1>
                     <p class="text-xs mb-4 leading-relaxed" style="color: var(--text-muted);">
-                        Создай комнату с кодом, настрой режим («Обычный» или «Под прикрытием») и позови друзей с их телефонов.
+                        Создай открытую или приватную комнату, выбери режим («Обычный» или «Под прикрытием») и играй с друзьями.
                     </p>
 
                     <button id="btn-create-online" ${net.connecting ? 'disabled' : ''} class="w-full py-3.5 rounded-2xl btn-primary font-bold text-sm flex items-center justify-center gap-2 mb-3">
                         ${net.connecting ? '<span class="pulse-dot">⏳ Подключение...</span>' : '➕ Создать онлайн-комнату'}
                     </button>
 
-                    <!-- Вход по коду -->
                     <div class="flex gap-2">
                         <input id="input-room-code" type="tel" maxlength="4" placeholder="Код комнаты (4 цифры)" class="flex-1 px-4 py-3 rounded-2xl field-input text-sm font-mono font-bold tracking-widest text-center">
                         <button id="btn-join-online" ${net.connecting ? 'disabled' : ''} class="px-5 py-3 rounded-2xl btn-secondary font-bold text-sm shrink-0">
@@ -1533,7 +2589,8 @@
                     </div>
                 </div>
 
-                <!-- Режим на одном устройстве -->
+                ${openRoomsHtml}
+
                 <div class="glass-card rounded-3xl p-5">
                     <div class="flex items-center justify-between mb-2">
                         <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/25">📱 Оффлайн</span>
@@ -1541,7 +2598,7 @@
                     </div>
                     <h2 class="text-lg font-extrabold tracking-tight mb-1">На одном телефоне</h2>
                     <p class="text-xs mb-4 leading-relaxed" style="color: var(--text-muted);">
-                        Идеально для компании за одной партой: передавайте смартфон по кругу, смотрите свои роли и голосуйте.
+                        Передавайте смартфон по кругу, смотрите свои роли и голосуйте прямо за одной партой.
                     </p>
                     <button id="btn-open-passplay" class="w-full py-3.5 rounded-2xl btn-secondary font-bold text-sm flex items-center justify-center gap-2">
                         🤝 Играть на одном устройстве
@@ -1552,7 +2609,7 @@
             </div>`;
         }
 
-        // --- ЭКРАН 2: ОНЛАЙН КОМНАТА (ЛОББИ / ИГРА / ПОСЛЕДНИЙ ШАНС / ИТОГИ) ---
+        // --- ЭКРАН 2: ОНЛАЙН КОМНАТА ---
         function renderOnlineRoomView() {
             const v = clientView;
             if (!v) {
@@ -1568,7 +2625,6 @@
                 ? '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-400/30">🎭 Под прикрытием</span>'
                 : '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">🕵️‍♂️ Обычный</span>';
 
-            // 2A. СОСТОЯНИЕ: ЛОББИ
             if (v.state === 'lobby') {
                 return `
                 <div class="fade-in space-y-3.5">
@@ -1585,8 +2641,10 @@
 
                         <div class="flex flex-wrap gap-1.5 mb-3">
                             ${modeBadge}
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${v.isPublic ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30' : 'btn-secondary'}">${v.isPublic ? '🔓 Открытая' : '🔒 Приватная'}</span>
                             <span class="px-2.5 py-1 rounded-full text-[11px] font-bold btn-secondary">🕵️‍♂️ Шпионов: ${v.spyCount}</span>
                             <span class="px-2.5 py-1 rounded-full text-[11px] font-bold btn-secondary">⏱ ${v.timerMin > 0 ? v.timerMin + ' мин' : 'Без таймера'}</span>
+                            ${v.tag ? `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold btn-secondary">🏷 ${escHtml(v.tag)}</span>` : ''}
                         </div>
 
                         <div class="grid grid-cols-2 gap-2">
@@ -1595,7 +2653,6 @@
                         </div>
                     </div>
 
-                    <!-- Список игроков -->
                     <div class="glass-card rounded-3xl p-4">
                         <div class="flex items-center justify-between mb-3">
                             <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">Игроки в комнате</span>
@@ -1605,8 +2662,8 @@
                             ${v.players.map(p => `
                                 <div class="flex items-center justify-between px-3.5 py-2.5 rounded-2xl" style="background: var(--bg-input);">
                                     <div class="flex items-center gap-2.5 min-w-0">
-                                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-indigo-500/25 text-indigo-200 shrink-0">
-                                            ${escHtml((p.name || 'И')[0].toUpperCase())}
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-base bg-indigo-500/25 shrink-0">
+                                            ${escHtml(p.avatar || (p.name || 'И')[0].toUpperCase())}
                                         </div>
                                         <div class="truncate">
                                             <div class="text-sm font-bold truncate">${escHtml(p.name)} ${p.id === currentUser.id ? '<span class="text-[11px] opacity-60">(Ты)</span>' : ''}</div>
@@ -1619,7 +2676,6 @@
                         </div>
                     </div>
 
-                    <!-- Кнопки управления -->
                     <div class="space-y-2 pt-1">
                         ${isHost ? `<button id="btn-start-online" class="w-full py-4 rounded-2xl btn-primary font-extrabold text-sm">🎮 Начать раунд</button>` : ''}
                         <button id="btn-leave-online" class="w-full py-3 rounded-2xl btn-danger font-bold text-xs">
@@ -1629,7 +2685,6 @@
                 </div>`;
             }
 
-            // 2B. СОСТОЯНИЕ: ИДЁТ ИГРА (КАРТОЧКА РОЛИ И ГОЛОСОВАНИЕ)
             if (v.state === 'playing') {
                 const timeLeft = v.roundEndTime > 0 ? Math.max(0, Math.floor((v.roundEndTime - Date.now()) / 1000)) : null;
 
@@ -1689,7 +2744,6 @@
 
                 return `
                 <div class="fade-in space-y-3.5">
-                    <!-- Статус-бар раунда -->
                     <div class="flex items-center justify-between glass-card rounded-2xl px-4 py-2.5 text-xs font-bold">
                         <span>${escHtml(v.packTitle)}</span>
                         <div class="flex items-center gap-2.5">
@@ -1698,17 +2752,14 @@
                         </div>
                     </div>
 
-                    <!-- Интерактивная карточка роли -->
                     <div class="role-card-wrap">
                         <div id="role-card-toggle" class="role-card-inner rounded-3xl p-7 text-center cursor-pointer min-h-[225px] flex flex-col items-center justify-center ${cardClass}">
                             ${cardContent}
                         </div>
                     </div>
 
-                    <!-- Панель голосования (если раскрыта) -->
                     ${voteSection}
 
-                    <!-- Кнопки действий -->
                     <div class="space-y-2">
                         <div class="grid grid-cols-2 gap-2">
                             <button id="btn-toggle-role-explicit" class="py-3 rounded-2xl btn-secondary font-bold text-xs">
@@ -1735,7 +2786,6 @@
                 </div>`;
             }
 
-            // 2C. СОСТОЯНИЕ: ПОСЛЕДНИЙ ШАНС ШПИОНА
             if (v.state === 'last_chance') {
                 return `
                 <div class="fade-in space-y-4">
@@ -1767,7 +2817,6 @@
                 </div>`;
             }
 
-            // 2D. СОСТОЯНИЕ: ИТОГИ РАУНДА
             if (v.state === 'results' && v.lastResult) {
                 const res = v.lastResult;
                 const isCivWin = res.winner === 'civilians';
@@ -1828,7 +2877,6 @@
                         <button id="pp-exit" class="px-3 py-1.5 rounded-xl btn-secondary text-xs font-bold">← Назад</button>
                     </div>
 
-                    <!-- Настройки раунда -->
                     <div class="glass-card rounded-3xl p-4 space-y-3">
                         <div>
                             <label class="block text-xs font-bold mb-1.5" style="color: var(--text-muted);">Набор слов</label>
@@ -1859,7 +2907,6 @@
                         </div>
                     </div>
 
-                    <!-- Список игроков -->
                     <div class="glass-card rounded-3xl p-4 space-y-2.5">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">Игроки (${passGame.players.length})</span>
@@ -1920,29 +2967,35 @@
                         <span>Игрок ${passGame.currentIdx + 1} из ${passGame.players.length}</span>
                     </div>
                     ${cardBlock}
+                    <button id="pp-exit" class="w-full py-2.5 rounded-xl btn-secondary text-xs font-bold">✕ Выйти в меню</button>
                 </div>`;
             }
 
             if (passGame.stage === 'discuss') {
                 return `
                 <div class="fade-in space-y-4">
-                    <div class="glass-card rounded-3xl p-6 text-center">
-                        <div class="text-xs font-bold uppercase tracking-widest mb-2" style="color: var(--text-muted);">Обсуждение • ${escHtml(pk.title)}</div>
+                    <div class="glass-card rounded-3xl p-6 text-center space-y-3">
+                        <div class="text-xs font-bold uppercase tracking-widest" style="color: var(--text-muted);">${escHtml(pk.title)}</div>
+                        <div class="text-4xl font-black font-mono tracking-wider" id="live-timer-display">
+                            ${passGame.timerMin > 0 ? formatTime(passGame.timerSecLeft) : '∞'}
+                        </div>
+                        <p class="text-xs" style="color: var(--text-muted);">
+                            Задавайте друг другу вопросы по кругу и ищите шпиона!
+                        </p>
                         ${passGame.timerMin > 0 ? `
-                            <div id="live-timer-display" class="text-5xl font-black font-mono tracking-tight my-3">${formatTime(passGame.timerSecLeft)}</div>
-                            <div class="flex justify-center gap-2 mt-3">
-                                <button id="pp-timer-toggle" class="px-5 py-2.5 rounded-xl btn-secondary text-xs font-bold">
-                                    ${passGame.timerRunning ? '⏸ Пауза' : '▶️ Старт таймера'}
-                                </button>
-                                <button id="pp-timer-plus" class="px-4 py-2.5 rounded-xl btn-secondary text-xs font-bold">+1 мин</button>
+                            <div class="flex justify-center gap-2 pt-1">
+                                <button id="pp-timer-toggle" class="px-4 py-2 rounded-xl btn-secondary text-xs font-bold">${passGame.timerRunning ? '⏸ Пауза' : '▶️ Старт'}</button>
+                                <button id="pp-timer-plus" class="px-4 py-2 rounded-xl btn-secondary text-xs font-bold">+1 мин</button>
                             </div>
-                        ` : `<div class="text-3xl my-3">🗣️</div><div class="font-bold text-sm">Задавайте друг другу вопросы!</div>`}
+                        ` : ''}
                     </div>
 
-                    <div class="space-y-2">
+                    <div class="space-y-2.5">
                         <button id="pp-go-vote" class="w-full py-4 rounded-2xl btn-primary font-extrabold text-sm">🗳 Перейти к голосованию</button>
-                        ${passGame.mode === 'classic' ? `<button id="pp-early-guess" class="w-full py-3.5 rounded-2xl bg-amber-500/20 border border-amber-400/40 text-amber-300 font-bold text-xs">💡 Шпион хочет назвать слово (Ва-банк)</button>` : ''}
-                        <button id="pp-abort" class="w-full py-3 rounded-2xl btn-danger font-bold text-xs">Завершить раунд</button>
+                        ${passGame.mode === 'classic' ? `
+                            <button id="pp-early-guess" class="w-full py-3.5 rounded-2xl bg-amber-500/20 border border-amber-400/45 text-amber-300 font-extrabold text-xs">💡 Шпион готов назвать слово (Ва-банк)</button>
+                        ` : ''}
+                        <button id="pp-abort" class="w-full py-3 rounded-2xl btn-secondary font-bold text-xs">🏁 Раскрыть роли сейчас</button>
                     </div>
                 </div>`;
             }
@@ -1950,68 +3003,73 @@
             if (passGame.stage === 'vote') {
                 return `
                 <div class="fade-in space-y-4">
-                    <div class="glass-card rounded-3xl p-4">
-                        <h2 class="text-lg font-black mb-1">🗳 Кого изгоняем?</h2>
-                        <p class="text-xs mb-4" style="color: var(--text-muted);">Выберите игрока, против которого проголосовало большинство:</p>
-                        <div class="space-y-2">
-                            ${passGame.players.map((name, idx) => `
-                                <button data-pp-kick="${idx}" class="w-full py-3.5 px-4 rounded-2xl btn-secondary font-bold text-sm flex items-center justify-between">
-                                    <span>🎯 ${escHtml(name)}</span>
-                                    <span class="text-xs opacity-60">Выбрать →</span>
-                                </button>
-                            `).join('')}
-                        </div>
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-black">🗳 Кого выгоняем?</h2>
+                        <button id="pp-back-discuss" class="px-3 py-1.5 rounded-xl btn-secondary text-xs font-bold">← К таймеру</button>
                     </div>
-                    <button id="pp-back-discuss" class="w-full py-3 rounded-2xl btn-secondary font-bold text-xs">← Вернуться к обсуждению</button>
+                    <p class="text-xs" style="color: var(--text-muted);">Нажми на игрока, против которого проголосовало большинство:</p>
+                    <div class="space-y-2">
+                        ${passGame.players.map((n, idx) => `
+                            <button data-pp-kick="${idx}" class="w-full py-3.5 px-4 rounded-2xl glass-card flex items-center justify-between font-bold text-sm active:scale-[0.98] transition">
+                                <span>🎯 ${escHtml(n)}</span>
+                                <span class="text-xs text-red-400 font-extrabold">Выгнать →</span>
+                            </button>
+                        `).join('')}
+                    </div>
                 </div>`;
             }
 
             if (passGame.stage === 'last_chance') {
-                const spyName = passGame.players[passGame.votedOutIdx];
+                const spyName = passGame.players[passGame.votedOutIdx] || 'Шпион';
                 return `
                 <div class="fade-in space-y-4">
                     <div class="rounded-3xl p-6 text-center spy-glow">
                         <div class="text-5xl mb-2">🔥</div>
-                        <div class="text-xs font-extrabold uppercase tracking-widest text-amber-300 mb-1">Последний шанс!</div>
-                        <h2 class="text-xl font-black text-white mb-2">Вы поймали шпиона: ${escHtml(spyName)}!</h2>
-                        <p class="text-xs text-white/85">Но у него есть 1 попытка назвать слово мирных, чтобы украсть победу!</p>
+                        <div class="text-xs font-extrabold uppercase tracking-widest text-amber-300 mb-1">Последний шанс</div>
+                        <h2 class="text-xl font-black text-white mb-2">Пойман шпион: ${escHtml(spyName)}!</h2>
+                        <p class="text-xs text-white/85">
+                            Дай шпиону последнюю попытку назвать слово мирных. Если угадает — он украдёт победу!
+                        </p>
                     </div>
+
                     <div class="glass-card rounded-3xl p-4 space-y-3">
                         <input id="pp-lc-input" type="text" placeholder="Слово шпиона..." class="w-full px-4 py-3.5 rounded-2xl field-input text-sm font-bold">
                         <button id="pp-lc-submit" class="w-full py-3.5 rounded-2xl btn-primary font-extrabold text-sm">🎯 Проверить догадку</button>
-                        <button id="pp-lc-skip" class="w-full py-2.5 rounded-2xl btn-secondary font-bold text-xs">⏭ Сдаться (Мирные победили)</button>
+                        <button id="pp-lc-skip" class="w-full py-3 rounded-2xl btn-secondary font-bold text-xs">🏳️ Сдаться (не знает слово)</button>
                     </div>
                 </div>`;
             }
 
             if (passGame.stage === 'results' && passGame.resultData) {
-                const res = passGame.resultData;
-                const isCivWin = res.winner === 'civilians';
+                const r = passGame.resultData;
+                const isCivWin = r.winner === 'civilians';
                 return `
                 <div class="fade-in space-y-4">
                     <div class="rounded-3xl p-6 text-center ${isCivWin ? 'civ-glow' : 'spy-glow'}">
                         <div class="text-5xl mb-2">${isCivWin ? '🏆' : '🕵️‍♂️'}</div>
-                        <h2 class="text-2xl font-black mb-1">${escHtml(res.headline)}</h2>
-                        <p class="text-xs opacity-85">${escHtml(res.subtext)}</p>
+                        <h2 class="text-2xl font-black mb-1">${escHtml(r.headline)}</h2>
+                        <p class="text-xs opacity-85">${escHtml(r.subtext)}</p>
                     </div>
-                    <div class="glass-card rounded-3xl p-4 space-y-2 text-sm">
-                        <div class="flex justify-between">
+
+                    <div class="glass-card rounded-3xl p-4 space-y-2.5 text-sm">
+                        <div class="flex justify-between py-1.5 border-b" style="border-color: var(--border-color);">
                             <span style="color: var(--text-muted);">🕵️‍♂️ Шпион(ы):</span>
-                            <span class="font-extrabold text-red-400">${escHtml(res.spyNames.join(', '))}</span>
+                            <span class="font-extrabold text-red-400">${escHtml(r.spyNames.join(', '))}</span>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between py-1.5 border-b" style="border-color: var(--border-color);">
                             <span style="color: var(--text-muted);">🃏 Слово мирных:</span>
                             <span class="font-extrabold text-indigo-300">${escHtml(passGame.card)}</span>
                         </div>
                         ${passGame.mode === 'undercover' ? `
-                        <div class="flex justify-between">
+                        <div class="flex justify-between py-1.5">
                             <span style="color: var(--text-muted);">🎭 Слово шпиона:</span>
                             <span class="font-extrabold text-fuchsia-300">${escHtml(passGame.spyCard)}</span>
                         </div>` : ''}
                     </div>
+
                     <div class="space-y-2">
                         <button id="pp-replay" class="w-full py-4 rounded-2xl btn-primary font-extrabold text-sm">🔄 Новый раунд</button>
-                        <button id="pp-to-setup" class="w-full py-3 rounded-2xl btn-secondary font-bold text-xs">⚙️ Настройки игры</button>
+                        <button id="pp-to-setup" class="w-full py-3 rounded-2xl btn-secondary font-bold text-xs">⚙️ Настройки и игроки</button>
                         <button id="pp-exit" class="w-full py-3 rounded-2xl btn-danger font-bold text-xs">🏠 В главное меню</button>
                     </div>
                 </div>`;
@@ -2021,37 +3079,35 @@
 
         // --- ЭКРАН 4: НАБОРЫ СЛОВ И КОНСТРУКТОР ---
         function renderPacksView() {
-            const packs = Object.values(getAllPacks());
+            const all = Object.values(getAllPacks());
             return `
             <div class="fade-in space-y-4">
                 <div class="flex items-center justify-between">
-                    <div>
-                        <h2 class="text-lg font-black">📦 Наборы слов</h2>
-                        <p class="text-xs" style="color: var(--text-muted);">Создавай свои темы (одноклассники, фильмы, мемы)</p>
-                    </div>
-                    <button id="btn-new-pack" class="px-3.5 py-2 rounded-xl btn-primary text-xs font-bold">➕ Создать</button>
+                    <h2 class="text-lg font-black">📦 Наборы слов</h2>
+                    <button id="btn-new-pack" class="px-3.5 py-2 rounded-xl btn-primary text-xs font-extrabold">➕ Создать свой</button>
                 </div>
 
                 <div class="space-y-2.5">
-                    ${packs.map(pk => `
-                        <div class="glass-card rounded-2xl p-4">
+                    ${all.map(pk => `
+                        <div class="glass-card rounded-3xl p-4">
                             <div class="flex items-start justify-between gap-2">
                                 <div>
-                                    <div class="font-extrabold text-sm">${escHtml(pk.title)}</div>
+                                    <div class="font-extrabold text-base">${escHtml(pk.title)}</div>
                                     <div class="text-xs mt-0.5" style="color: var(--text-muted);">
-                                        Слов: <b>${pk.items.length}</b> ${pk.pairs && pk.pairs.length ? `• Пар «Под прикрытием»: <b>${pk.pairs.length}</b>` : ''}
+                                        🃏 Слов: <b>${pk.items.length}</b> ${pk.pairs && pk.pairs.length ? `• 🎭 Пар: <b>${pk.pairs.length}</b>` : ''}
                                     </div>
                                 </div>
-                                ${pk.builtin
-                                    ? '<span class="px-2 py-0.5 rounded-lg text-[10px] font-bold btn-secondary">Встроен</span>'
-                                    : `<div class="flex gap-1.5">
+                                ${pk.builtin ? `
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold btn-secondary">Встроенный</span>
+                                ` : `
+                                    <div class="flex gap-1.5">
                                         <button data-edit-pack="${escHtml(pk.id)}" class="px-2.5 py-1.5 rounded-xl btn-secondary text-xs font-bold">✏️</button>
                                         <button data-del-pack="${escHtml(pk.id)}" class="px-2.5 py-1.5 rounded-xl btn-danger text-xs font-bold">🗑</button>
-                                       </div>`
-                                }
+                                    </div>
+                                `}
                             </div>
-                            <div class="mt-2.5 text-[11px] truncate" style="color: var(--text-muted);">
-                                ${escHtml(pk.items.slice(0, 7).join(', '))}${pk.items.length > 7 ? '...' : ''}
+                            <div class="mt-2.5 text-[11px] line-clamp-2 opacity-75" style="color: var(--text-muted);">
+                                ${escHtml(pk.items.slice(0, 10).join(', '))}${pk.items.length > 10 ? '...' : ''}
                             </div>
                         </div>
                     `).join('')}
@@ -2059,39 +3115,169 @@
             </div>`;
         }
 
-        // --- ЭКРАН 5: НАСТРОЙКИ ПРИЛОЖЕНИЯ ---
+        // --- ЭКРАН 5: НАСТРОЙКИ ПРИЛОЖЕНИЯ И КАСТОМИЗАЦИЯ ---
         function renderSettingsView() {
-            const themes = [
-                { id: 'dark', label: '🌑 Тёмная' },
-                { id: 'neon', label: '⚡ Неон' },
-                { id: 'telegram', label: '✈️ Telegram' },
-                { id: 'light', label: '☀️ Светлая' }
+            const cardStyles = [
+                { id: 'glass',   label: '🧊 Стекло' },
+                { id: 'solid',   label: '🧱 Плотный' },
+                { id: 'neon',    label: '✨ Неон-контур' },
+                { id: 'minimal', label: '▫️ Минимал' }
             ];
+            const radiusOpts = [
+                { id: 'sharp',  label: 'Острые' },
+                { id: 'normal', label: 'Стандарт' },
+                { id: 'pill',   label: 'Плавные' }
+            ];
+            const bgOpts = [
+                { id: 'orbs', label: '🌌 Свечение' },
+                { id: 'grid', label: '📐 Сетка' },
+                { id: 'none', label: '⬛ Чистый' }
+            ];
+            const ct = Object.assign({}, DEFAULT_CUSTOM_THEME, appSettings.customTheme || {});
+
+            const customThemeEditorHtml = appSettings.theme === 'custom' ? `
+                <div class="mt-3 p-3.5 rounded-2xl space-y-3" style="background: var(--bg-input); border: 1px solid var(--border-color);">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold">🎨 Конструктор своей темы</span>
+                        <div class="flex gap-1.5">
+                            <button id="btn-ct-random" class="px-2.5 py-1 rounded-lg btn-secondary text-[11px] font-bold">🎲 Рандом</button>
+                            <button id="btn-ct-reset" class="px-2.5 py-1 rounded-lg btn-secondary text-[11px] font-bold">↺ Сброс</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-[11px] font-bold">
+                        <label class="flex items-center justify-between px-2.5 py-2 rounded-xl btn-secondary cursor-pointer">
+                            <span>Фон</span>
+                            <input data-ct-key="bgMain" type="color" value="${escHtml(ct.bgMain)}" class="w-6 h-6 rounded cursor-pointer bg-transparent border-0">
+                        </label>
+                        <label class="flex items-center justify-between px-2.5 py-2 rounded-xl btn-secondary cursor-pointer">
+                            <span>Карточки</span>
+                            <input data-ct-key="bgCard" type="color" value="${escHtml(ct.bgCard)}" class="w-6 h-6 rounded cursor-pointer bg-transparent border-0">
+                        </label>
+                        <label class="flex items-center justify-between px-2.5 py-2 rounded-xl btn-secondary cursor-pointer">
+                            <span>Текст</span>
+                            <input data-ct-key="textMain" type="color" value="${escHtml(ct.textMain)}" class="w-6 h-6 rounded cursor-pointer bg-transparent border-0">
+                        </label>
+                        <label class="flex items-center justify-between px-2.5 py-2 rounded-xl btn-secondary cursor-pointer">
+                            <span>Подписи</span>
+                            <input data-ct-key="textMuted" type="color" value="${escHtml(ct.textMuted)}" class="w-6 h-6 rounded cursor-pointer bg-transparent border-0">
+                        </label>
+                        <label class="flex items-center justify-between px-2.5 py-2 rounded-xl btn-secondary cursor-pointer">
+                            <span>Акцент 1</span>
+                            <input data-ct-key="accent" type="color" value="${escHtml(ct.accent)}" class="w-6 h-6 rounded cursor-pointer bg-transparent border-0">
+                        </label>
+                        <label class="flex items-center justify-between px-2.5 py-2 rounded-xl btn-secondary cursor-pointer">
+                            <span>Акцент 2</span>
+                            <input data-ct-key="accent2" type="color" value="${escHtml(ct.accent2)}" class="w-6 h-6 rounded cursor-pointer bg-transparent border-0">
+                        </label>
+                        <label class="col-span-2 flex items-center justify-between px-2.5 py-2 rounded-xl btn-secondary cursor-pointer">
+                            <span>Цвет рамок</span>
+                            <input data-ct-key="border" type="color" value="${escHtml(ct.border)}" class="w-6 h-6 rounded cursor-pointer bg-transparent border-0">
+                        </label>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-[11px] font-bold mb-1" style="color: var(--text-muted);">
+                            <span>Прозрачность карточек</span>
+                            <span id="ct-alpha-val">${ct.cardAlpha}%</span>
+                        </div>
+                        <input id="ct-alpha-slider" type="range" min="15" max="100" step="5" value="${ct.cardAlpha}" class="w-full cursor-pointer">
+                    </div>
+                </div>
+            ` : '';
 
             return `
             <div class="fade-in space-y-4">
-                <h2 class="text-lg font-black">⚙️ Настройки приложения</h2>
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-black">⚙️ Настройки и кастомизация</h2>
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/25">💾 Автосохранение</span>
+                </div>
 
-                <!-- Профиль -->
-                <div class="glass-card rounded-3xl p-4 space-y-2.5">
-                    <div class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">Твой профиль</div>
+                <!-- Профиль и аватар -->
+                <div class="glass-card rounded-3xl p-4 space-y-3">
+                    <div class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">Профиль и аватар</div>
                     <div class="flex gap-2">
                         <input id="set-player-name" type="text" value="${escHtml(currentUser.name)}" placeholder="Твоё имя в игре" class="flex-1 px-3.5 py-2.5 rounded-xl field-input text-sm font-semibold">
                         <button id="btn-save-name" class="px-4 py-2.5 rounded-xl btn-primary text-xs font-bold">Ок</button>
                     </div>
-                </div>
-
-                <!-- Тема оформления -->
-                <div class="glass-card rounded-3xl p-4 space-y-2.5">
-                    <div class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">Тема оформления</div>
-                    <div class="grid grid-cols-2 gap-2">
-                        ${themes.map(t => `
-                            <button data-set-theme="${t.id}" class="py-2.5 rounded-xl text-xs font-bold ${appSettings.theme === t.id ? 'btn-primary' : 'btn-secondary'}">${t.label}</button>
+                    <div class="grid grid-cols-6 gap-1.5">
+                        ${AVATAR_CHOICES.map(em => `
+                            <button data-set-avatar="${em}" class="py-2 rounded-xl text-lg flex items-center justify-center transition ${currentUser.avatar === em ? 'btn-primary scale-105' : 'btn-secondary'}">${em}</button>
                         `).join('')}
                     </div>
                 </div>
 
-                <!-- Переключатели -->
+                <!-- Выбор шрифта (включая Determination Old Cyrillic) -->
+                <div class="glass-card rounded-3xl p-4 space-y-2.5">
+                    <div class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">Шрифт приложения (${FONT_LIST.length})</div>
+                    <div class="grid grid-cols-1 gap-1.5">
+                        ${FONT_LIST.map(f => `
+                            <button data-set-font="${f.id}" class="py-2.5 px-3.5 rounded-xl text-xs font-bold flex items-center justify-between gap-2 ${appSettings.font === f.id ? 'btn-primary' : 'btn-secondary'}" style="font-family: ${f.css};">
+                                <span style="font-family: ${f.css};">${escHtml(f.label)}</span>
+                                <span class="text-[11px] opacity-80" style="font-family: ${f.css};">Шпион 123</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- 26 Тем оформления + Своя тема -->
+                <div class="glass-card rounded-3xl p-4 space-y-2.5">
+                    <div class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">Темы оформления (${THEME_LIST.length})</div>
+                    <div class="grid grid-cols-2 gap-2">
+                        ${THEME_LIST.map(t => {
+                            const dot1 = t.id === 'custom' ? ct.bgMain : t.c1;
+                            const dot2 = t.id === 'custom' ? ct.accent : t.c2;
+                            return `
+                            <button data-set-theme="${t.id}" class="py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-between gap-2 ${appSettings.theme === t.id ? 'btn-primary' : 'btn-secondary'}">
+                                <span class="truncate">${t.label}</span>
+                                <span class="flex items-center shrink-0">
+                                    <span class="w-3 h-3 rounded-full border border-white/30" style="background:${dot1}"></span>
+                                    <span class="w-3 h-3 rounded-full -ml-1 border border-white/30" style="background:${dot2}"></span>
+                                </span>
+                            </button>`;
+                        }).join('')}
+                    </div>
+                    ${customThemeEditorHtml}
+                </div>
+
+                <!-- Акцентный цвет и стиль интерфейса -->
+                <div class="glass-card rounded-3xl p-4 space-y-4">
+                    <div>
+                        <div class="text-xs font-bold uppercase tracking-wider mb-2" style="color: var(--text-muted);">Свой цвет акцента</div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            ${ACCENT_PRESETS.map(col => `
+                                <button data-set-accent="${col}" class="w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold transition ${appSettings.customAccent === col ? 'border-white scale-110' : 'border-transparent opacity-80'}" style="background:${col || 'linear-gradient(135deg,#64748b,#334155)'}">
+                                    ${col === '' ? '↺' : ''}
+                                </button>
+                            `).join('')}
+                            <label class="w-8 h-8 rounded-full border border-white/25 flex items-center justify-center text-xs cursor-pointer btn-secondary" title="Любой цвет">
+                                🎨
+                                <input id="set-custom-color" type="color" value="${appSettings.customAccent || '#6366f1'}" class="sr-only">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="text-xs font-bold uppercase tracking-wider mb-2" style="color: var(--text-muted);">Стиль карточек</div>
+                        <div class="grid grid-cols-2 gap-2">
+                            ${cardStyles.map(s => `<button data-set-card-style="${s.id}" class="py-2 rounded-xl text-xs font-bold ${appSettings.cardStyle === s.id ? 'btn-primary' : 'btn-secondary'}">${s.label}</button>`).join('')}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="text-xs font-bold uppercase tracking-wider mb-2" style="color: var(--text-muted);">Скругление углов</div>
+                        <div class="grid grid-cols-3 gap-2">
+                            ${radiusOpts.map(r => `<button data-set-radius="${r.id}" class="py-2 rounded-xl text-xs font-bold ${appSettings.radius === r.id ? 'btn-primary' : 'btn-secondary'}">${r.label}</button>`).join('')}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="text-xs font-bold uppercase tracking-wider mb-2" style="color: var(--text-muted);">Эффект фона</div>
+                        <div class="grid grid-cols-3 gap-2">
+                            ${bgOpts.map(b => `<button data-set-bg="${b.id}" class="py-2 rounded-xl text-xs font-bold ${appSettings.bgStyle === b.id ? 'btn-primary' : 'btn-secondary'}">${b.label}</button>`).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Переключатели поведения -->
                 <div class="glass-card rounded-3xl p-4 space-y-4">
                     <div class="flex items-center justify-between gap-3">
                         <div>
@@ -2116,6 +3302,14 @@
                         </div>
                         <button data-toggle="holdToReveal" class="toggle-track ${appSettings.holdToReveal ? 'active' : ''}"><div class="toggle-thumb"></div></button>
                     </div>
+
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <div class="text-sm font-bold">📐 Компактный интерфейс</div>
+                            <div class="text-[11px]" style="color: var(--text-muted);">Меньше отступов — больше на экране</div>
+                        </div>
+                        <button data-toggle="compact" class="toggle-track ${appSettings.compact ? 'active' : ''}"><div class="toggle-thumb"></div></button>
+                    </div>
                 </div>
 
                 <!-- Ссылка для приглашений через Telegram-бота -->
@@ -2128,13 +3322,18 @@
                     </div>
                 </div>
 
-                <!-- Краткие правила -->
-                <button id="btn-show-rules" class="w-full py-3.5 rounded-2xl glass-card font-bold text-xs">📖 Правила игры и режимов</button>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="btn-show-rules" class="py-3.5 rounded-2xl glass-card font-bold text-xs">📖 Правила игры</button>
+                    <button id="btn-reset-all-settings" class="py-3.5 rounded-2xl btn-danger font-bold text-xs">↺ Сбросить настройки</button>
+                </div>
+
+                <!-- Пустое поле внизу настроек: 10 нажатий открывают плавающий кружок чит-меню -->
+                <div id="settings-secret-empty-zone" class="w-full h-28 rounded-3xl glass-card" style="touch-action: manipulation; -webkit-user-select: none;"></div>
             </div>`;
         }
 
         // =========================================================================
-        // 10. МОДАЛЬНЫЕ ОКНА (НАСТРОЙКИ КОМНАТЫ, КОНСТРУКТОР ПАКОВ, ДОГАДКА)
+        // 10. МОДАЛЬНЫЕ ОКНА
         // =========================================================================
         function openRoomSettingsModal() {
             if (!net.isHost || !hostRoom) return;
@@ -2149,6 +3348,19 @@
                     <div>
                         <label class="block text-xs font-bold mb-1" style="color: var(--text-muted);">Название комнаты</label>
                         <input id="rcfg-title" type="text" maxlength="32" value="${escHtml(hostRoom.title)}" class="w-full px-3.5 py-2.5 rounded-xl field-input text-sm font-bold">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold mb-1" style="color: var(--text-muted);">Тег / заметка комнаты (необязательно)</label>
+                        <input id="rcfg-tag" type="text" maxlength="24" value="${escHtml(hostRoom.tag || '')}" placeholder="Например: 8-В класс / фаст катка" class="w-full px-3.5 py-2.5 rounded-xl field-input text-sm">
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 rounded-2xl" style="background: var(--bg-input);">
+                        <div>
+                            <div class="text-xs font-extrabold">🔓 Открытая комната</div>
+                            <div class="text-[11px]" style="color: var(--text-muted);">Показывать в общем списке при входе</div>
+                        </div>
+                        <button id="rcfg-public" class="toggle-track ${hostRoom.isPublic ? 'active' : ''}"><div class="toggle-thumb"></div></button>
                     </div>
 
                     <div>
@@ -2197,6 +3409,7 @@
 
             document.getElementById('rcfg-m-classic').onclick = () => { hostRoom.mode = 'classic'; sfxClick(); openRoomSettingsModal(); };
             document.getElementById('rcfg-m-under').onclick = () => { hostRoom.mode = 'undercover'; sfxClick(); openRoomSettingsModal(); };
+            document.getElementById('rcfg-public').onclick = () => { hostRoom.isPublic = !hostRoom.isPublic; sfxClick(); openRoomSettingsModal(); };
             document.querySelectorAll('[data-rcfg-mp]').forEach(b => b.onclick = () => { hostRoom.maxPlayers = Number(b.dataset.rcfgMp); sfxClick(); openRoomSettingsModal(); });
             document.querySelectorAll('[data-rcfg-spy]').forEach(b => b.onclick = () => { hostRoom.spyCount = Number(b.dataset.rcfgSpy); sfxClick(); openRoomSettingsModal(); });
             document.querySelectorAll('[data-rcfg-tm]').forEach(b => b.onclick = () => { hostRoom.timerMin = Number(b.dataset.rcfgTm); sfxClick(); openRoomSettingsModal(); });
@@ -2204,12 +3417,25 @@
             document.getElementById('rcfg-save').onclick = () => {
                 const newTitle = document.getElementById('rcfg-title').value.trim();
                 if (newTitle) hostRoom.title = newTitle.slice(0, 32);
+                hostRoom.tag = document.getElementById('rcfg-tag').value.trim().slice(0, 24);
                 hostRoom.packId = document.getElementById('rcfg-pack').value;
+                // Сохраняем настройки комнаты для будущих созданий
+                roomDefaults = {
+                    title: newTitle && !/^Комната #\d{4}$/.test(newTitle) ? hostRoom.title : '',
+                    tag: hostRoom.tag,
+                    isPublic: hostRoom.isPublic,
+                    maxPlayers: hostRoom.maxPlayers,
+                    mode: hostRoom.mode,
+                    packId: hostRoom.packId,
+                    spyCount: hostRoom.spyCount,
+                    timerMin: hostRoom.timerMin
+                };
+                persistRoomDefaults();
                 rememberRoom(hostRoom.code, hostRoom.title);
                 sfxSuccess();
                 closeModal();
                 syncHostToAll();
-                showToast('Настройки комнаты обновлены', 'success');
+                showToast('Настройки комнаты сохранены!', 'success');
             };
         }
 
@@ -2297,24 +3523,29 @@
         // 11. ПРИВЯЗКА СОБЫТИЙ ТЕКУЩЕГО ЭКРАНА
         // =========================================================================
         function bindCurrentViewEvents() {
-            // Главная
             if (activeView === 'home') {
                 const btnCreate = document.getElementById('btn-create-online');
                 const btnJoin = document.getElementById('btn-join-online');
                 const codeInput = document.getElementById('input-room-code');
                 const btnPass = document.getElementById('btn-open-passplay');
+                const btnRef = document.getElementById('btn-refresh-lobby');
 
                 if (btnCreate) btnCreate.onclick = () => { sfxClick(); createOnlineRoom(); };
                 if (btnJoin) btnJoin.onclick = () => { sfxClick(); joinOnlineRoom(codeInput.value); };
                 if (codeInput) codeInput.onkeydown = (e) => { if (e.key === 'Enter') joinOnlineRoom(codeInput.value); };
                 if (btnPass) btnPass.onclick = () => { sfxClick(); openPassPlaySetup(); };
+                if (btnRef) btnRef.onclick = () => {
+                    sfxClick();
+                    if (!lobbyDir.client) initOpenRoomsDirectory();
+                    render();
+                    showToast('Список открытых комнат обновлён', 'info');
+                };
 
                 document.querySelectorAll('[data-rejoin]').forEach(btn => {
                     btn.onclick = () => { sfxClick(); joinOnlineRoom(btn.dataset.rejoin); };
                 });
             }
 
-            // Онлайн комната
             if (activeView === 'online_room') {
                 const copyBtn = document.getElementById('btn-copy-code');
                 if (copyBtn) copyBtn.onclick = () => {
@@ -2345,7 +3576,6 @@
                 const backLobbyBtn = document.getElementById('btn-back-lobby');
                 if (backLobbyBtn) backLobbyBtn.onclick = () => { sfxClick(); returnOnlineToLobby(); };
 
-                // Карточка роли (тап или удержание)
                 const roleCard = document.getElementById('role-card-toggle');
                 const toggleBtn = document.getElementById('btn-toggle-role-explicit');
                 if (roleCard) {
@@ -2391,33 +3621,37 @@
                 if (lcSkip) lcSkip.onclick = () => { sfxClick(); finishOnlineVoting(true); };
             }
 
-            // Pass & Play
             if (activeView === 'pass_play') {
                 const exitBtn = document.getElementById('pp-exit');
                 if (exitBtn) exitBtn.onclick = () => { stopTimerLoop(); passGame.active = false; activeView = 'home'; render(); };
 
                 const packSel = document.getElementById('pp-pack');
-                if (packSel) packSel.onchange = () => { passGame.packId = packSel.value; };
+                if (packSel) packSel.onchange = () => {
+                    passGame.packId = packSel.value;
+                    passDefaults.packId = passGame.packId;
+                    persistPassDefaults();
+                };
 
                 const mClassic = document.getElementById('pp-mode-classic');
                 const mUnder = document.getElementById('pp-mode-under');
-                if (mClassic) mClassic.onclick = () => { passGame.mode = 'classic'; sfxClick(); render(); };
-                if (mUnder) mUnder.onclick = () => { passGame.mode = 'undercover'; sfxClick(); render(); };
+                if (mClassic) mClassic.onclick = () => { passGame.mode = 'classic'; passDefaults.mode = 'classic'; persistPassDefaults(); sfxClick(); render(); };
+                if (mUnder) mUnder.onclick = () => { passGame.mode = 'undercover'; passDefaults.mode = 'undercover'; persistPassDefaults(); sfxClick(); render(); };
 
-                document.querySelectorAll('[data-pp-spy]').forEach(b => b.onclick = () => { passGame.spyCount = Number(b.dataset.ppSpy); sfxClick(); render(); });
-                document.querySelectorAll('[data-pp-timer]').forEach(b => b.onclick = () => { passGame.timerMin = Number(b.dataset.ppTimer); sfxClick(); render(); });
+                document.querySelectorAll('[data-pp-spy]').forEach(b => b.onclick = () => { passGame.spyCount = Number(b.dataset.ppSpy); passDefaults.spyCount = passGame.spyCount; persistPassDefaults(); sfxClick(); render(); });
+                document.querySelectorAll('[data-pp-timer]').forEach(b => b.onclick = () => { passGame.timerMin = Number(b.dataset.ppTimer); passDefaults.timerMin = passGame.timerMin; persistPassDefaults(); sfxClick(); render(); });
 
                 document.querySelectorAll('[data-pp-name]').forEach(inp => {
-                    inp.oninput = () => { passGame.players[Number(inp.dataset.ppName)] = inp.value; };
+                    inp.oninput = () => { passGame.players[Number(inp.dataset.ppName)] = inp.value; persistPassDefaults(); };
                 });
                 document.querySelectorAll('[data-pp-del]').forEach(btn => {
-                    btn.onclick = () => { passGame.players.splice(Number(btn.dataset.ppDel), 1); sfxClick(); render(); };
+                    btn.onclick = () => { passGame.players.splice(Number(btn.dataset.ppDel), 1); persistPassDefaults(); sfxClick(); render(); };
                 });
 
                 const addP = document.getElementById('pp-add-player');
                 if (addP) addP.onclick = () => {
                     if (passGame.players.length >= 12) { showToast('Максимум 12 игроков', 'warn'); return; }
                     passGame.players.push(`Игрок ${passGame.players.length + 1}`);
+                    persistPassDefaults();
                     sfxClick();
                     render();
                 };
@@ -2535,9 +3769,9 @@
                 if (ppToSetup) ppToSetup.onclick = () => { passGame.stage = 'setup'; sfxClick(); render(); };
             }
 
-            // Наборы слов
             if (activeView === 'packs') {
-                document.getElementById('btn-new-pack').onclick = () => { sfxClick(); openPackEditorModal(); };
+                const btnNew = document.getElementById('btn-new-pack');
+                if (btnNew) btnNew.onclick = () => { sfxClick(); openPackEditorModal(); };
                 document.querySelectorAll('[data-edit-pack]').forEach(b => {
                     b.onclick = () => { sfxClick(); openPackEditorModal(b.dataset.editPack); };
                 });
@@ -2553,22 +3787,159 @@
                 });
             }
 
-            // Настройки приложения
             if (activeView === 'settings') {
-                document.getElementById('btn-save-name').onclick = () => {
-                    const v = document.getElementById('set-player-name').value.trim();
+                const nameInput = document.getElementById('set-player-name');
+                const saveNameAction = () => {
+                    if (!nameInput) return;
+                    const v = nameInput.value.trim();
                     if (!v) return;
                     currentUser.name = v.slice(0, 24);
-                    saveJson('spy_guest_user', currentUser);
+                    currentUser.customName = currentUser.name;
+                    persistUserProfile();
                     sfxSuccess();
-                    showToast('Имя обновлено!', 'success');
+                    showToast('Имя сохранено!', 'success');
                     render();
                 };
+                const saveNameBtn = document.getElementById('btn-save-name');
+                if (saveNameBtn) saveNameBtn.onclick = saveNameAction;
+                if (nameInput) nameInput.onkeydown = (e) => { if (e.key === 'Enter') saveNameAction(); };
+
+                document.querySelectorAll('[data-set-avatar]').forEach(b => {
+                    b.onclick = () => {
+                        currentUser.avatar = b.dataset.setAvatar;
+                        persistUserProfile();
+                        sfxClick();
+                        haptic('light');
+                        render();
+                    };
+                });
+
+                document.querySelectorAll('[data-set-font]').forEach(b => {
+                    b.onclick = () => {
+                        appSettings.font = b.dataset.setFont;
+                        persistSettings();
+                        applyTheme();
+                        sfxClick();
+                        haptic('light');
+                        render();
+                    };
+                });
 
                 document.querySelectorAll('[data-set-theme]').forEach(b => {
                     b.onclick = () => {
                         appSettings.theme = b.dataset.setTheme;
-                        saveJson(STORAGE_KEYS.SETTINGS, appSettings);
+                        if (appSettings.theme !== 'custom') appSettings.customAccent = '';
+                        persistSettings();
+                        applyTheme();
+                        sfxClick();
+                        render();
+                    };
+                });
+
+                // Конструктор своей темы
+                document.querySelectorAll('[data-ct-key]').forEach(inp => {
+                    const key = inp.dataset.ctKey;
+                    inp.oninput = () => {
+                        appSettings.customTheme[key] = inp.value;
+                        persistSettings();
+                        applyTheme();
+                    };
+                    inp.onchange = () => {
+                        appSettings.customTheme[key] = inp.value;
+                        persistSettings();
+                        applyTheme();
+                        render();
+                    };
+                });
+
+                const ctAlphaSlider = document.getElementById('ct-alpha-slider');
+                const ctAlphaVal = document.getElementById('ct-alpha-val');
+                if (ctAlphaSlider) {
+                    ctAlphaSlider.oninput = () => {
+                        appSettings.customTheme.cardAlpha = Number(ctAlphaSlider.value);
+                        if (ctAlphaVal) ctAlphaVal.textContent = `${appSettings.customTheme.cardAlpha}%`;
+                        persistSettings();
+                        applyTheme();
+                    };
+                    ctAlphaSlider.onchange = () => persistSettings();
+                }
+
+                const ctRandBtn = document.getElementById('btn-ct-random');
+                if (ctRandBtn) ctRandBtn.onclick = () => {
+                    const randHex = (min, max) => '#' + [0,1,2].map(() => Math.floor(min + Math.random() * (max - min)).toString(16).padStart(2, '0')).join('');
+                    const darkBg = Math.random() > 0.25;
+                    appSettings.customTheme = {
+                        bgMain: darkBg ? randHex(8, 32) : randHex(232, 250),
+                        bgCard: darkBg ? randHex(20, 52) : '#ffffff',
+                        textMain: darkBg ? '#f8fafc' : '#0f172a',
+                        textMuted: darkBg ? '#94a3b8' : '#475569',
+                        accent: randHex(80, 245),
+                        accent2: randHex(80, 245),
+                        border: randHex(90, 220),
+                        cardAlpha: 78
+                    };
+                    persistSettings();
+                    applyTheme();
+                    sfxClick();
+                    render();
+                };
+
+                const ctResetBtn = document.getElementById('btn-ct-reset');
+                if (ctResetBtn) ctResetBtn.onclick = () => {
+                    appSettings.customTheme = Object.assign({}, DEFAULT_CUSTOM_THEME);
+                    persistSettings();
+                    applyTheme();
+                    sfxClick();
+                    render();
+                };
+
+                document.querySelectorAll('[data-set-accent]').forEach(b => {
+                    b.onclick = () => {
+                        appSettings.customAccent = b.dataset.setAccent;
+                        persistSettings();
+                        applyTheme();
+                        sfxClick();
+                        render();
+                    };
+                });
+
+                const colorInp = document.getElementById('set-custom-color');
+                if (colorInp) {
+                    colorInp.oninput = () => {
+                        appSettings.customAccent = colorInp.value;
+                        persistSettings();
+                        applyTheme();
+                    };
+                    colorInp.onchange = () => {
+                        persistSettings();
+                        render();
+                    };
+                }
+
+                document.querySelectorAll('[data-set-card-style]').forEach(b => {
+                    b.onclick = () => {
+                        appSettings.cardStyle = b.dataset.setCardStyle;
+                        persistSettings();
+                        applyTheme();
+                        sfxClick();
+                        render();
+                    };
+                });
+
+                document.querySelectorAll('[data-set-radius]').forEach(b => {
+                    b.onclick = () => {
+                        appSettings.radius = b.dataset.setRadius;
+                        persistSettings();
+                        applyTheme();
+                        sfxClick();
+                        render();
+                    };
+                });
+
+                document.querySelectorAll('[data-set-bg]').forEach(b => {
+                    b.onclick = () => {
+                        appSettings.bgStyle = b.dataset.setBg;
+                        persistSettings();
                         applyTheme();
                         sfxClick();
                         render();
@@ -2579,21 +3950,38 @@
                     b.onclick = () => {
                         const key = b.dataset.toggle;
                         appSettings[key] = !appSettings[key];
-                        saveJson(STORAGE_KEYS.SETTINGS, appSettings);
+                        persistSettings();
+                        applyTheme();
                         sfxClick();
                         haptic('light');
                         render();
                     };
                 });
 
-                document.getElementById('btn-save-bot').onclick = () => {
-                    appSettings.botUsername = document.getElementById('set-bot-user').value.trim().replace(/^@/, '');
-                    saveJson(STORAGE_KEYS.SETTINGS, appSettings);
+                const botInput = document.getElementById('set-bot-user');
+                const saveBotAction = () => {
+                    if (!botInput) return;
+                    appSettings.botUsername = botInput.value.trim().replace(/^@/, '');
+                    persistSettings();
                     sfxSuccess();
                     showToast('Username бота сохранён!', 'success');
                 };
+                const saveBotBtn = document.getElementById('btn-save-bot');
+                if (saveBotBtn) saveBotBtn.onclick = saveBotAction;
+                if (botInput) botInput.onkeydown = (e) => { if (e.key === 'Enter') saveBotAction(); };
 
-                document.getElementById('btn-show-rules').onclick = () => {
+                const resetAllBtn = document.getElementById('btn-reset-all-settings');
+                if (resetAllBtn) resetAllBtn.onclick = () => {
+                    Object.assign(appSettings, JSON.parse(JSON.stringify(DEFAULT_SETTINGS)));
+                    persistSettings();
+                    applyTheme();
+                    sfxClick();
+                    showToast('Настройки сброшены по умолчанию', 'info');
+                    render();
+                };
+
+                const rulesBtn = document.getElementById('btn-show-rules');
+                if (rulesBtn) rulesBtn.onclick = () => {
                     sfxClick();
                     openModal(`
                         <div class="flex items-center justify-between mb-3">
@@ -2607,37 +3995,150 @@
                         </div>
                     `);
                 };
+
+                const secretEmptyZone = document.getElementById('settings-secret-empty-zone');
+                if (secretEmptyZone) {
+                    secretEmptyZone.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleSecretEmptyTap();
+                    };
+                }
             }
         }
 
-        // Навигация снизу
+        // =========================================================================
+        // 12. ИНИЦИАЛИЗАЦИЯ, НАВИГАЦИЯ, DEEP-LINK И ОБЛАЧНОЕ СОХРАНЕНИЕ
+        // =========================================================================
+        window.__closeModal = closeModal;
+
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                currentTab = btn.dataset.nav;
-                activeView = currentTab;
+                const target = btn.dataset.nav;
+                if (!target) return;
+                currentTab = target;
+                activeView = target;
                 sfxClick();
                 haptic('light');
                 render();
             });
         });
 
-        window.__closeModal = closeModal;
+        let pendingDeepLinkCode = null;
 
-        // Автоматический вход по ссылке (?room=1234 или Telegram ?startapp=1234)
         function checkDeepLink() {
-            const urlParams = new URLSearchParams(window.location.search);
-            let autoCode = urlParams.get('room');
-            if (!autoCode && tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
-                autoCode = tg.initDataUnsafe.start_param;
+            let roomParam = null;
+            try {
+                const params = new URLSearchParams(window.location.search);
+                roomParam = params.get('room') || params.get('tgWebAppStartParam');
+            } catch {}
+            if (!roomParam && tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
+                roomParam = tg.initDataUnsafe.start_param;
             }
-            if (autoCode && /^\d{4}$/.test(autoCode)) {
-                setTimeout(() => joinOnlineRoom(autoCode), 450);
+            if (roomParam) {
+                const code = String(roomParam).replace(/\D/g, '').slice(0, 4);
+                if (code.length === 4) {
+                    if (typeof Peer !== 'undefined') joinOnlineRoom(code);
+                    else pendingDeepLinkCode = code;
+                }
             }
         }
 
-        applyTheme();
-        render();
-        checkDeepLink();
+        function loadExternalScript(src, onLoad) {
+            try {
+                const s = document.createElement('script');
+                s.src = src;
+                s.async = true;
+                s.onload = () => { if (typeof onLoad === 'function') onLoad(); };
+                document.head.appendChild(s);
+            } catch {}
+        }
+
+        function syncFromCloudStorage() {
+            try {
+                if (!tg || !tg.CloudStorage || typeof tg.CloudStorage.getItems !== 'function') return;
+                const keys = [
+                    STORAGE_KEYS.SETTINGS,
+                    'spy_guest_user',
+                    STORAGE_KEYS.ROOM_DEFAULTS,
+                    STORAGE_KEYS.PASS_DEFAULTS
+                ];
+                tg.CloudStorage.getItems(keys, (err, vals) => {
+                    if (err || !vals) return;
+                    let changed = false;
+                    if (vals[STORAGE_KEYS.SETTINGS]) {
+                        try {
+                            const cs = JSON.parse(vals[STORAGE_KEYS.SETTINGS]);
+                            Object.assign(appSettings, cs);
+                            appSettings.customTheme = Object.assign({}, DEFAULT_CUSTOM_THEME, cs.customTheme || {});
+                            saveJson(STORAGE_KEYS.SETTINGS, appSettings);
+                            changed = true;
+                        } catch {}
+                    }
+                    if (vals['spy_guest_user']) {
+                        try {
+                            const cu = JSON.parse(vals['spy_guest_user']);
+                            if (cu.customName) { currentUser.name = cu.customName; currentUser.customName = cu.customName; }
+                            if (cu.avatar) currentUser.avatar = cu.avatar;
+                            saveJson('spy_guest_user', currentUser);
+                            changed = true;
+                        } catch {}
+                    }
+                    if (vals[STORAGE_KEYS.ROOM_DEFAULTS]) {
+                        try {
+                            Object.assign(roomDefaults, JSON.parse(vals[STORAGE_KEYS.ROOM_DEFAULTS]));
+                            saveJson(STORAGE_KEYS.ROOM_DEFAULTS, roomDefaults);
+                        } catch {}
+                    }
+                    if (vals[STORAGE_KEYS.PASS_DEFAULTS]) {
+                        try {
+                            Object.assign(passDefaults, JSON.parse(vals[STORAGE_KEYS.PASS_DEFAULTS]));
+                            saveJson(STORAGE_KEYS.PASS_DEFAULTS, passDefaults);
+                        } catch {}
+                    }
+                    if (changed) {
+                        applyTheme();
+                        render();
+                    }
+                });
+            } catch {}
+        }
+
+        function initTgSdkLate() {
+            if (!tg && window.Telegram && window.Telegram.WebApp) {
+                tg = window.Telegram.WebApp;
+                try { tg.ready(); tg.expand(); } catch {}
+                applyTheme();
+                syncFromCloudStorage();
+                checkDeepLink();
+            }
+        }
+
+        window.addEventListener('load', initTgSdkLate);
+
+        try {
+            applyTheme();
+            render();
+            checkDeepLink();
+            syncFromCloudStorage();
+        } catch (err) {
+            const root = document.getElementById('app-root');
+            if (root) {
+                root.innerHTML = `<div class="p-4 text-xs text-red-300">Ошибка запуска: ${escHtml(err && err.message ? err.message : err)}</div>`;
+            }
+        }
+
+        // Подгружаем сетевые библиотеки в фоне, чтобы интерфейс открывался мгновенно
+        loadExternalScript('https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js', () => {
+            if (pendingDeepLinkCode) {
+                const code = pendingDeepLinkCode;
+                pendingDeepLinkCode = null;
+                joinOnlineRoom(code);
+            }
+        });
+        loadExternalScript('https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js', () => {
+            initOpenRoomsDirectory();
+        });
     })();
     </script>
 </body>
